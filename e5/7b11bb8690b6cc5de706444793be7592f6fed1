@@ -1,0 +1,117 @@
+demos/cellphone/lv_demo_cellphone_home.c
+  ae758125cdec5b17 9,24,35,38-42,50,53-54,179,196,199-201,205-208,220-225,230-233,239-244,249,251-259,261
+  70c833f7f015c1a5 36-37,51-52,215-219,226-229,245-248,250,260
+demos/cellphone/lv_demo_cellphone_common.h
+  ae758125cdec5b17 58,61-133,136,138-149
+demos/cellphone/lv_demo_cellphone_camera.h
+  ae758125cdec5b17 1-27
+demos/cellphone/lv_demo_cellphone.c
+  ae758125cdec5b17 31,36-37,43-100,114,130,134-136,156,208-238,264-268,351-352,371-372,375,394-395,499-502,564-585,587,589,591,597-599
+  70c833f7f015c1a5 107,131-132,254-256,276-289,334,440-447,490,586,588,590,592-596
+demos/cellphone/lv_demo_cellphone_lock.c
+  ae758125cdec5b17 8,19-20,69-78,83-94,142-188,227-238
+TODO.md
+  e6781dcebe8edd42 5,7,10,14,19,22-24,26,33-37,43-45,50-51,68-71,81,84,89-104,106,108-110,112,114,116-117,119,123-124,130,132-133,135-136,141-142
+  ae758125cdec5b17 9,12,16-18,20-21,25,27-32,38-42,46-49,53-66,72-79,85-88,111,118
+demos/cellphone/lv_demo_cellphone_camera.c
+  ae758125cdec5b17 1-142
+demos/cellphone/lv_demo_cellphone_settings.c
+  ae758125cdec5b17 8,23,25,46-47,49-50,68-71,116-143,225-291,319-321,323-337
+  70c833f7f015c1a5 322
+demos/cellphone/lv_demo_cellphone_music.c
+  ae758125cdec5b17 188-207
+demos/cellphone/lv_demo_cellphone_contacts.c
+  ae758125cdec5b17 7-8,22-23,138,143,151,156,167-176
+demos/cellphone/lv_demo_cellphone_sms.c
+  ae758125cdec5b17 24-25,32,104,106,176-186,195-205,209-259
+demos/cellphone/lv_demo_cellphone_photo.c
+  70c833f7f015c1a5 32-33,38,164-168,183,206,262-283
+  ae758125cdec5b17 30-31,34-37,39,132-133,140-163,169,176-178,200-203,209-211,215-261,284-288
+demos/cellphone/lv_demo_cellphone_calc.c
+  ae758125cdec5b17 30-31,324,379-400
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e57b11bb8690b6cc5de706444793be7592f6fed1",
+  "prompts": {
+    "3d8c46f67dc260fe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c12798df-1bb6-4d56-b708-bc651b039244",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 73,
+      "total_deletions": 0,
+      "accepted_lines": 2235,
+      "overriden_lines": 38
+    },
+    "70c833f7f015c1a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dc69f-cb64-7411-929f-390a65d8e80c",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 174,
+      "total_deletions": 59,
+      "accepted_lines": 157,
+      "overriden_lines": 0
+    },
+    "9733848f48088b35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dc7aa-7c44-7240-a32c-0f39564116f4",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "ae758125cdec5b17": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8695b90f-67f3-4ba7-9fdd-b4e7b7ca4429",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 12660,
+      "total_deletions": 8745,
+      "accepted_lines": 12528,
+      "overriden_lines": 0
+    },
+    "cf36ba396445e43d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dc69f-d58a-7560-9b14-46d562e156ae",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 0,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    },
+    "e6781dcebe8edd42": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2910f63e-766f-4d5c-8224-d062e0a06f63",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 98,
+      "total_deletions": 93,
+      "accepted_lines": 63,
+      "overriden_lines": 0
+    }
+  }
+}
