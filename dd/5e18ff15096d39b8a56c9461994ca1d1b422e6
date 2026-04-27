@@ -1,0 +1,115 @@
+src/font/lv_font_vec.h
+  57facbcb5536e275 1-175
+src/font/lv_font_vec_montserrat.c
+  57facbcb5536e275 1-2619
+TODO.md
+  2e18350ae4e8b44b 47-70,124-133
+  57facbcb5536e275 71-123
+demos/cellphone/lv_demo_cellphone_lock.c
+  57facbcb5536e275 35-36,38
+demos/cellphone/lv_demo_cellphone_home.c
+  57facbcb5536e275 77,166
+demos/cellphone/lv_demo_cellphone_sms.c
+  57facbcb5536e275 208-209
+demos/cellphone/config/lv_conf.h
+  57facbcb5536e275 22-36
+lv_conf_template.h
+  57facbcb5536e275 724-732
+scripts/built_in_font/twin-ttf-lvgl.c
+  57facbcb5536e275 1-111
+src/lv_conf_internal.h
+  57facbcb5536e275 2117-2143,4927
+demos/cellphone/lv_demo_cellphone.c
+  57facbcb5536e275 47-76,94-101,107,125-131,137,272-284,286,306-309
+src/font/lv_font_vec.c
+  57facbcb5536e275 1-1734
+src/font/lv_font_vec_default_roman.c
+  57facbcb5536e275 1-200,202-1191
+  94825a567c8c959a 201
+demos/cellphone/assets/img_lv_demo_music_cover_3.c
+  511c2fbf47596ea0 19,102,107-108
+  57facbcb5536e275 1-18,20-101,103-106,109-111
+demos/cellphone/assets/img_lv_demo_music_cover_2.c
+  511c2fbf47596ea0 19,102,107-108
+  57facbcb5536e275 1-18,20-101,103-106,109-111
+demos/cellphone/main_test.c
+  57facbcb5536e275 32-35,394-439
+demos/cellphone/assets/img_lv_demo_music_cover_1.c
+  511c2fbf47596ea0 19,102,107-108
+  57facbcb5536e275 1-18,20-101,103-106,109-111
+demos/cellphone/lv_demo_cellphone_music.c
+  57facbcb5536e275 18-20,23,26
+  511c2fbf47596ea0 37-39,42-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "dd5e18ff15096d39b8a56c9461994ca1d1b422e6",
+  "prompts": {
+    "04c7810bf31117e9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dccf1-341f-74a1-a583-300a1459fa00",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 20,
+      "total_deletions": 0,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    },
+    "2e18350ae4e8b44b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e5b5f88-ff89-4855-ade3-732918716690",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 86,
+      "total_deletions": 47,
+      "accepted_lines": 34,
+      "overriden_lines": 0
+    },
+    "511c2fbf47596ea0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dccf1-2976-7923-8252-7866f0a6fdaa",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 20,
+      "total_deletions": 30,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    },
+    "57facbcb5536e275": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0a1ab716-1e3d-4071-b3ff-4898fb7c32d9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 22499,
+      "total_deletions": 11718,
+      "accepted_lines": 6389,
+      "overriden_lines": 0
+    },
+    "94825a567c8c959a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dca2b-1174-74b2-82ec-d3f64abb7c81",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
