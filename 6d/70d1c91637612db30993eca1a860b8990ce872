@@ -1,0 +1,66 @@
+demos/cellphone/lv_demo_cellphone.c
+  32ebb4b21887aed1 407-424
+demos/cellphone/lv_demo_cellphone_navbar.c
+  32ebb4b21887aed1 26-30,47-50
+demos/cellphone/config/lv_conf_mcu.h
+  32ebb4b21887aed1 15,17-19,28,30,32,34,36-38,49,58
+demos/cellphone/README.md
+  32ebb4b21887aed1 129,138-141,157-159,161-165,167,171,173-174,185-191
+demos/cellphone/config/lv_conf.h
+  32ebb4b21887aed1 47
+demos/cellphone/lv_demo_cellphone_photo.c
+  32ebb4b21887aed1 83,171
+demos/cellphone/lv_demo_cellphone_camera.c
+  32ebb4b21887aed1 76
+src/font/lv_font_vec.c
+  32ebb4b21887aed1 206-211,255-258,359-370,1532-1534,1538-1540
+demos/cellphone/lv_demo_cellphone_music.c
+  32ebb4b21887aed1 237
+demos/cellphone/lv_demo_cellphone_sms.c
+  32ebb4b21887aed1 115,262,266-268
+demos/cellphone/lv_demo_cellphone_calllog.c
+  32ebb4b21887aed1 36,59
+demos/cellphone/lv_demo_cellphone_statusbar.c
+  32ebb4b21887aed1 38-41
+demos/cellphone/lv_demo_cellphone_common.h
+  32ebb4b21887aed1 240-253
+demos/cellphone/main_test.c
+  32ebb4b21887aed1 427-479,588-591,601
+demos/cellphone/lv_demo_cellphone_lock.c
+  32ebb4b21887aed1 140,146
+demos/cellphone/lv_demo_cellphone_home.c
+  32ebb4b21887aed1 132-134,170-172,176-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6d70d1c91637612db30993eca1a860b8990ce872",
+  "prompts": {
+    "32ebb4b21887aed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b0c770fd-9334-4603-beb5-85e02f8b294f",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 329,
+      "total_deletions": 159,
+      "accepted_lines": 326,
+      "overriden_lines": 0
+    },
+    "b30d8eecfffde76a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15a129cd-85d2-4817-a964-1ff5773ecddd",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 127,
+      "overriden_lines": 50
+    }
+  }
+}
