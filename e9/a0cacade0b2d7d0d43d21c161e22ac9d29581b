@@ -1,0 +1,59 @@
+demos/cellphone/mem_report.c
+  2b9553b4a5d7e21b 1-264
+TODO.md
+  2b9553b4a5d7e21b 49-76,79-83,88-91
+demos/cellphone/config/lv_conf.h
+  2b9553b4a5d7e21b 28-46
+demos/cellphone/main_test.c
+  2b9553b4a5d7e21b 36-42,103-111,113-121,123-126,454-457,473-478,486,488,526-532,534-536,541,545
+demos/cellphone/config/lv_conf_mcu.h
+  2b9553b4a5d7e21b 15-19,28,32,34,45,50-54
+demos/cellphone/README.md
+  2b9553b4a5d7e21b 129,137-139,149-151,155-157,163,166,177-181,200-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e9a0cacade0b2d7d0d43d21c161e22ac9d29581b",
+  "prompts": {
+    "2b9553b4a5d7e21b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "551bda7c-1e4e-44a5-9c7e-8327879dde62",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 638,
+      "total_deletions": 222,
+      "accepted_lines": 411,
+      "overriden_lines": 0
+    },
+    "5390b5b7da69680c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dd755-3222-7c42-82ca-ae4123c90747",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "74df6153608b4663": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "962a06a3-8b80-4c50-bb95-85238a222158",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
