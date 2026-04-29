@@ -1,0 +1,129 @@
+demos/lv_demos.h
+  3f7d67eaec27f7e7 52-55
+demos/cellphone/lv_demo_cellphone_dialer.h
+  3f7d67eaec27f7e7 1-26
+demos/cellphone/lv_demo_cellphone_lock.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/lv_demo_cellphone_common.h
+  3f7d67eaec27f7e7 1-232
+demos/cellphone/lv_demo_cellphone.h
+  3f7d67eaec27f7e7 1-56
+demos/cellphone/lv_demo_cellphone_calc.h
+  3f7d67eaec27f7e7 1-27
+demos/cellphone/config/lv_conf_mcu.h
+  3f7d67eaec27f7e7 1-72
+demos/cellphone/lv_demo_cellphone_calllog.c
+  3f7d67eaec27f7e7 1-128
+demos/cellphone/assets/generated/img_icon_calc.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_home.c
+  3f7d67eaec27f7e7 1-292
+demos/cellphone/lv_demo_cellphone.c
+  3f7d67eaec27f7e7 1-680
+demos/cellphone/lv_demo_cellphone_skin.h
+  3f7d67eaec27f7e7 1-168
+demos/cellphone/lv_demo_cellphone_anim.c
+  3f7d67eaec27f7e7 1-150
+demos/cellphone/lv_demo_cellphone_data.c
+  3f7d67eaec27f7e7 1-138
+demos/cellphone/lv_demo_cellphone_statusbar.h
+  3f7d67eaec27f7e7 1-26
+demos/cellphone/config/lv_conf.h
+  3f7d67eaec27f7e7 1-67
+demos/cellphone/lv_demo_cellphone_navbar.c
+  3f7d67eaec27f7e7 1-59
+demos/cellphone/lv_demo_cellphone_photo.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/lv_demo_cellphone_music.c
+  3f7d67eaec27f7e7 1-321
+env_support/cmake/main.cmake
+  3f7d67eaec27f7e7 71
+demos/cellphone/lv_demo_cellphone_dialer.c
+  3f7d67eaec27f7e7 1-270
+demos/cellphone/lv_demo_cellphone_sms.c
+  3f7d67eaec27f7e7 1-235
+demos/cellphone/lv_demo_cellphone_calc.c
+  3f7d67eaec27f7e7 1-403
+demos/cellphone/lv_demo_cellphone_photo.c
+  3f7d67eaec27f7e7 1-292
+demos/cellphone/lv_demo_cellphone_data.h
+  3f7d67eaec27f7e7 1-94
+demos/cellphone/assets/generated/img_icon_settings.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_contacts.c
+  3f7d67eaec27f7e7 1-181
+demos/cellphone/lv_demo_cellphone_statusbar.c
+  3f7d67eaec27f7e7 1-76
+demos/cellphone/mem_report.c
+  3f7d67eaec27f7e7 1-264
+demos/cellphone/lv_demo_cellphone_sms.h
+  3f7d67eaec27f7e7 1-22
+lv_conf_template.h
+  3f7d67eaec27f7e7 1553-1559
+demos/cellphone/lv_demo_cellphone_camera.h
+  3f7d67eaec27f7e7 1-27
+demos/cellphone/lv_demo_cellphone_camera.c
+  3f7d67eaec27f7e7 1-142
+demos/cellphone/assets/generated/img_icon_sms.c
+  3f7d67eaec27f7e7 1-100
+src/lv_conf_internal.h
+  3f7d67eaec27f7e7 4906-4930
+demos/cellphone/lv_demo_cellphone_contacts.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/assets/generated/img_icon_phone.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/assets/generated/img_icon_music.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_music.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/main_test.c
+  3f7d67eaec27f7e7 1-604
+demos/cellphone/lv_demo_cellphone_settings.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/assets/generated/img_icon_clock.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_lock.c
+  3f7d67eaec27f7e7 1-245
+demos/cellphone/assets/generated/img_icon_contacts.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_calllog.h
+  3f7d67eaec27f7e7 1-22
+demos/cellphone/lv_demo_cellphone_anim.h
+  3f7d67eaec27f7e7 1-55
+demos/cellphone/assets/generated/img_icon_photo.c
+  3f7d67eaec27f7e7 1-100
+demos/cellphone/lv_demo_cellphone_navbar.h
+  3f7d67eaec27f7e7 1-26
+demos/cellphone/lv_demo_cellphone_skin.c
+  3f7d67eaec27f7e7 1-468
+demos/cellphone/lv_demo_cellphone_settings.c
+  3f7d67eaec27f7e7 1-393
+demos/cellphone/README.md
+  3f7d67eaec27f7e7 173-181
+demos/lv_demos.c
+  3f7d67eaec27f7e7 64-67
+demos/cellphone/lv_demo_cellphone_home.h
+  3f7d67eaec27f7e7 1-25
+demos/cellphone/main_sdl.c
+  3f7d67eaec27f7e7 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "06ad90e7040ea742ed97765e347cacc36d3d9e8d",
+  "prompts": {
+    "3f7d67eaec27f7e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8bc2232e-ed39-482b-880c-9212ff37f831",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 26172,
+      "total_deletions": 7,
+      "accepted_lines": 26711,
+      "overriden_lines": 0
+    }
+  }
+}
