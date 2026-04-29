@@ -1,0 +1,80 @@
+demos/cellphone/lv_demo_cellphone_softkbd.h
+  ab0ca0817e91d9ec 1-70
+demos/cellphone/lv_demo_cellphone_softkbd.c
+  cc11400afbea45cf 14,16-17,372-398,401-402
+  ab0ca0817e91d9ec 1-13,15,18-371,399-400
+demos/cellphone/lv_demo_cellphone_sms.c
+  ab0ca0817e91d9ec 9,25,28-29,38-40,43-44,115-116,145-147,149,152,161-163,167-177,202-206,217-267,313-317,320-321
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d8e42f58fb330b694e2331f3d97029e4f66a131f",
+  "prompts": {
+    "3f7d67eaec27f7e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8bc2232e-ed39-482b-880c-9212ff37f831",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 19005,
+      "overriden_lines": 0
+    },
+    "a13ee37c8aa675fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dd871-735b-71c1-ad25-61a3024d25f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "ab0ca0817e91d9ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21b58e72-f25f-4f2e-93c9-25dd14b3ca92",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 752,
+      "total_deletions": 1922,
+      "accepted_lines": 533,
+      "overriden_lines": 0
+    },
+    "cc11400afbea45cf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dd871-6a4f-76c2-b126-31cff532cf9f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 50179,
+      "total_deletions": 2,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    },
+    "f5a31801e3ed975d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f2e1ff6c-443e-487f-a8b8-c77968db4e3f",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 18789,
+      "total_deletions": 64,
+      "accepted_lines": 67,
+      "overriden_lines": 0
+    }
+  }
+}
