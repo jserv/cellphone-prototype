@@ -1,0 +1,48 @@
+demos/cellphone/lv_demo_cellphone_statusbar.c
+  8268b31dd21ad811 38-39,44-46,50,55,62,69
+demos/cellphone/lv_demo_cellphone_navbar.c
+  8268b31dd21ad811 30-36,42,49-50,55-57
+demos/cellphone/lv_demo_cellphone_calc.c
+  8268b31dd21ad811 94-97
+demos/cellphone/lv_demo_cellphone_lock.c
+  8268b31dd21ad811 40-42,44,156
+demos/cellphone/lv_demo_cellphone.c
+  8268b31dd21ad811 67,69-85,103-119,315-323,328-333,335-339,350-353,415-417,419-420
+demos/cellphone/lv_demo_cellphone_settings.c
+  8268b31dd21ad811 174-176,317
+demos/cellphone/lv_demo_cellphone_common.h
+  8268b31dd21ad811 61-70,75,77,79,103,126-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "8f64ba52c92af8354935ca9429b3d380eb4d2e97",
+  "prompts": {
+    "8268b31dd21ad811": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4ea09335-6582-4669-b694-1e5d905aa075",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 174,
+      "total_deletions": 117,
+      "accepted_lines": 122,
+      "overriden_lines": 0
+    },
+    "ab0ca0817e91d9ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21b58e72-f25f-4f2e-93c9-25dd14b3ca92",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
