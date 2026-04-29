@@ -1,0 +1,64 @@
+demos/cellphone/lv_demo_cellphone_navbar.c
+  b30d8eecfffde76a 40,47
+demos/cellphone/lv_demo_cellphone.c
+  b30d8eecfffde76a 397-416
+demos/cellphone/lv_demo_cellphone_contacts.c
+  b30d8eecfffde76a 98-99,103,106,109,136-137,146-147
+demos/cellphone/lv_demo_cellphone_calc.c
+  b30d8eecfffde76a 67
+demos/cellphone/lv_demo_cellphone_calllog.c
+  b30d8eecfffde76a 36,61,89,94,104-105,110-111
+demos/cellphone/lv_demo_cellphone_common.h
+  b30d8eecfffde76a 230-246
+demos/cellphone/lv_demo_cellphone_music.c
+  b30d8eecfffde76a 95,237,244-245,251-252,255-256,259-260,272,279-280,283-284,287
+demos/cellphone/lv_demo_cellphone_photo.c
+  b30d8eecfffde76a 54-55,59,83,95-96,134,141-142,146,153-154,173,182-183
+demos/cellphone/lv_demo_cellphone_sms.c
+  b30d8eecfffde76a 78-79,84-85,144,181-182,286-287,292-293
+demos/cellphone/lv_demo_cellphone_statusbar.c
+  b30d8eecfffde76a 40,52,56-57,61-62
+demos/cellphone/lv_demo_cellphone_dialer.c
+  b30d8eecfffde76a 66,111,146,226-227,231-232,236-237
+demos/cellphone/lv_demo_cellphone_home.c
+  b30d8eecfffde76a 121,132,156,173,187-188,192-193
+demos/cellphone/lv_demo_cellphone_camera.c
+  b30d8eecfffde76a 61-62,87-88,103-104
+demos/cellphone/lv_demo_cellphone_lock.c
+  b30d8eecfffde76a 51,57,67,74-75,79,107-108,140,148
+demos/cellphone/lv_demo_cellphone_skin.c
+  b30d8eecfffde76a 188,197,341,354,366,379,394,421
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "2f3aff0fb4a8b9f8775f85153d0e9205f149c492",
+  "prompts": {
+    "8268b31dd21ad811": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4ea09335-6582-4669-b694-1e5d905aa075",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "b30d8eecfffde76a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15a129cd-85d2-4817-a964-1ff5773ecddd",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 2378,
+      "total_deletions": 373,
+      "accepted_lines": 438,
+      "overriden_lines": 0
+    }
+  }
+}
