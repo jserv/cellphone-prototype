@@ -1,0 +1,60 @@
+demos/cellphone/assets/generated/img_icon_sms.c
+  74df6153608b4663 1-8,10,16-84,88-99
+TODO.md
+  74df6153608b4663 49-52,68-71
+demos/cellphone/assets/generated/img_icon_contacts.c
+  74df6153608b4663 1-8,10,16-84,88-99
+demos/cellphone/assets/generated/img_icon_clock.c
+  74df6153608b4663 1-8,10,16-84,88-99
+demos/cellphone/assets/generated/img_icon_phone.c
+  74df6153608b4663 1-8,10,16-84,88-99
+demos/cellphone/assets/generated/img_icon_photo.c
+  74df6153608b4663 1-8,10,16-84,88-99
+demos/cellphone/main_test.c
+  74df6153608b4663 96-115,439-446,460,468,470,507-525
+demos/cellphone/config/lv_conf_mcu.h
+  74df6153608b4663 1-72
+demos/cellphone/README.md
+  74df6153608b4663 99-101,110,124,126-129,131-176,191-192
+demos/cellphone/assets/generated/img_icon_settings.c
+  74df6153608b4663 1-8,10,16-84,88-99
+demos/cellphone/assets/generated/img_icon_music.c
+  74df6153608b4663 1-8,10,16-84,88-99
+DONE.md
+  74df6153608b4663 383-419
+demos/cellphone/assets/generated/img_icon_calc.c
+  74df6153608b4663 1-8,10,16-84,88-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "367285c23354055176cc972ed9b9aac4b7fcceca",
+  "prompts": {
+    "74df6153608b4663": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "962a06a3-8b80-4c50-bb95-85238a222158",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 1128,
+      "total_deletions": 3364,
+      "accepted_lines": 938,
+      "overriden_lines": 1
+    },
+    "aa306d161e4a64b5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dd6d4-0f5c-7ba0-bf71-6a714eb2610a",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 16,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}
