@@ -1,0 +1,62 @@
+demos/cellphone/lv_demo_cellphone_navbar.c
+  e17e8ee86045b88e 149
+demos/cellphone/lv_demo_cellphone_anim.h
+  e17e8ee86045b88e 50-71
+demos/cellphone/lv_demo_cellphone_photo.c
+  e17e8ee86045b88e 8,49,126,157,164-165,167,205,222-227
+demos/cellphone/lv_demo_cellphone_calc.c
+  e17e8ee86045b88e 9,84,381-382,389
+demos/cellphone/lv_demo_cellphone_anim.c
+  e17e8ee86045b88e 38-76,111-116,121-126
+demos/cellphone/lv_demo_cellphone_softkbd.c
+  e17e8ee86045b88e 13,146,154-156,170,172,176,252
+demos/cellphone/lv_demo_cellphone_lock.c
+  e17e8ee86045b88e 161-162,164-167,170,186-187
+demos/cellphone/lv_demo_cellphone_contacts.c
+  e17e8ee86045b88e 78,90,128
+demos/cellphone/lv_demo_cellphone_music.c
+  e17e8ee86045b88e 224
+demos/cellphone/lv_demo_cellphone_dialer.c
+  e17e8ee86045b88e 140
+demos/cellphone/lv_demo_cellphone_sms.c
+  e17e8ee86045b88e 66,244
+demos/cellphone/lv_demo_cellphone_camera.c
+  e17e8ee86045b88e 8,33,115-117
+demos/cellphone/lv_demo_cellphone_common.h
+  e17e8ee86045b88e 248-255,263-270
+demos/cellphone/lv_demo_cellphone.c
+  e17e8ee86045b88e 16,62-66,68,70-72,443,449,452-457,462-467,503,540-545,564-569,588,670
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "054237587abf5c1bb6390941c7cc5dd2aa3a1b7a",
+  "prompts": {
+    "0c688fc7dd40fbfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6bae6cc5-7b19-472b-942e-a561b33b2e99",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 949,
+      "overriden_lines": 0
+    },
+    "e17e8ee86045b88e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aacdcc6f-bae5-4f5f-8c59-d7f55dae21b5",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 179,
+      "total_deletions": 193,
+      "accepted_lines": 179,
+      "overriden_lines": 0
+    }
+  }
+}
