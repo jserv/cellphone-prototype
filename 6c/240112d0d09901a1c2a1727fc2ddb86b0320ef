@@ -1,0 +1,88 @@
+demos/cellphone/lv_demo_cellphone_settings.c
+  2e767b5a01ab94ed 44-47,324,338-343
+demos/cellphone/lv_demo_cellphone_contacts.c
+  2e767b5a01ab94ed 93-96,107
+demos/cellphone/lv_demo_cellphone_photo.c
+  2e767b5a01ab94ed 95-97,115,238-240
+  0389146b81808f3e 237
+demos/cellphone/lv_demo_cellphone_dialer.c
+  2e767b5a01ab94ed 55-61,117-121
+demos/cellphone/lv_demo_cellphone_home.c
+  2e767b5a01ab94ed 23,28-29,39,50,68,190-192,197,199,201-204,206-215,217-220,224-229,235,240,247-274
+demos/cellphone/lv_demo_cellphone_lock.c
+  2e767b5a01ab94ed 112
+demos/cellphone/lv_demo_cellphone_sms.c
+  2e767b5a01ab94ed 44,207-210,254,256,258-265,270-271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6c240112d0d09901a1c2a1727fc2ddb86b0320ef",
+  "prompts": {
+    "0389146b81808f3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dee96-6f33-7090-a3e5-f6313f45bfa9",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "2e767b5a01ab94ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "400da724-60a1-4c82-b991-cf0fb3d13b92",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 2183,
+      "total_deletions": 238,
+      "accepted_lines": 134,
+      "overriden_lines": 0
+    },
+    "6c88eccd00238016": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deebe-758b-7cc2-b6c3-dee3bdf7780a",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 5,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    },
+    "a915510fb3912613": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dee96-7786-7141-aec3-15fc143ba777",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "aaa7c7a207a8df17": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deb9b-7454-75b3-b315-53e90f72869e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 11260,
+      "overriden_lines": 0
+    }
+  }
+}
