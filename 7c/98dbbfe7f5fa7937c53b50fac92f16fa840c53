@@ -1,0 +1,36 @@
+tests/CMakeLists.txt
+  6c88eccd00238016 368-371
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "7c98dbbfe7f5fa7937c53b50fac92f16fa840c53",
+  "prompts": {
+    "2e767b5a01ab94ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "400da724-60a1-4c82-b991-cf0fb3d13b92",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    },
+    "6c88eccd00238016": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deebe-758b-7cc2-b6c3-dee3bdf7780a",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
