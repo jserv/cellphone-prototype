@@ -1,0 +1,52 @@
+demos/cellphone/config/lv_conf_mcu_test.h
+  aaa7c7a207a8df17 1-44
+demos/cellphone/lv_demo_cellphone_common.h
+  aaa7c7a207a8df17 150-169,227-232
+demos/cellphone/lv_demo_cellphone_calc.c
+  aaa7c7a207a8df17 23,31,59,61-62,67-107,180,337,339-356,358-360
+demos/cellphone/main_test.c
+  aaa7c7a207a8df17 63,121-171,225-248,405-532,574,576,578,586,588,592,594,598,600,602,613-622,653,687-689,691-693,695-697,699-701,704-711,731,733,737-748,886,896,959-963
+demos/cellphone/config/lv_conf.h
+  aaa7c7a207a8df17 58-59
+demos/cellphone/lv_demo_cellphone_dialer.c
+  aaa7c7a207a8df17 33,93-121,163-182,186,192
+demos/cellphone/config/lv_conf_mcu.h
+  aaa7c7a207a8df17 15,24-26,37,43,47,51,55,62-65,72,77-87
+demos/cellphone/lv_demo_cellphone.c
+  aaa7c7a207a8df17 154-160,173-177,185-189,239,537,575-595,609-619,627-631,677-678,814-818
+demos/cellphone/README.md
+  aaa7c7a207a8df17 190,217,231,237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "b5b42b6e05475c4e1ad93dfe7d12e5eab8b9ce02",
+  "prompts": {
+    "a48a5616808d1828": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deb8e-2f3a-7c53-a5d3-4aa23aaa5fbe",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "aaa7c7a207a8df17": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deb9b-7454-75b3-b315-53e90f72869e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 35797,
+      "total_deletions": 2342,
+      "accepted_lines": 33658,
+      "overriden_lines": 0
+    }
+  }
+}
