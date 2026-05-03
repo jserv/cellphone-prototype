@@ -618,7 +618,8 @@ void lv_obj_refr(lv_layer_t * layer, lv_obj_t * obj)
  **********************/
 
 /**
- * Join the areas which has got common parts
+ * Merge invalidated areas whose union does not enlarge the redraw region:
+ * overlapping pairs and edge-adjacent pairs (zero pixel growth).
  */
 static void lv_refr_join_area(void)
 {
@@ -636,16 +637,15 @@ static void lv_refr_join_area(void)
                 continue;
             }
 
-            /*Check if the areas are on each other*/
-            if(lv_area_is_on(&disp_refr->inv_areas[join_in], &disp_refr->inv_areas[join_from]) == false) {
-                continue;
-            }
-
             lv_area_join(&joined_area, &disp_refr->inv_areas[join_in], &disp_refr->inv_areas[join_from]);
 
-            /*Join two area only if the joined area size is smaller*/
-            if(lv_area_get_size(&joined_area) < (lv_area_get_size(&disp_refr->inv_areas[join_in]) +
-                                                 lv_area_get_size(&disp_refr->inv_areas[join_from]))) {
+            /*Merge iff the union does not increase the total redrawn pixel
+             *count. `<` covers overlap (overlapping pixels were double-
+             *counted in the sum); `<=` also covers strict edge-adjacency
+             *(union == sum), which would otherwise issue a redundant flush
+             *per touching pair.*/
+            if(lv_area_get_size(&joined_area) <= (lv_area_get_size(&disp_refr->inv_areas[join_in]) +
+                                                  lv_area_get_size(&disp_refr->inv_areas[join_from]))) {
                 lv_area_copy(&disp_refr->inv_areas[join_in], &joined_area);
 
                 /*Mark 'join_form' is joined into 'join_in'*/
