@@ -9,7 +9,9 @@ void setUp(void)
 {
     /* Function run before every test */
     /* Temporarily remove other JPEG decoders to make sure tjpegd is used */
+#if LV_USE_LIBJPEG_TURBO
     lv_libjpeg_turbo_deinit();
+#endif
 #if LV_USE_FFMPEG
     lv_ffmpeg_deinit();
 #endif
@@ -48,7 +50,9 @@ static void create_images(void)
 void test_tjpgd_1(void)
 {
     /* Temporarily remove libjpeg_turbo decoder */
+#if LV_USE_LIBJPEG_TURBO
     lv_libjpeg_turbo_deinit();
+#endif
 
     create_images();
 
@@ -67,7 +71,9 @@ void test_tjpgd_1(void)
     TEST_ASSERT_MEM_LEAK_LESS_THAN(mem_before, 32);
 
     /* Re-add libjpeg_turbo decoder */
+#if LV_USE_LIBJPEG_TURBO
     lv_libjpeg_turbo_init();
+#endif
 }
 
 static void create_image_2(void)
@@ -83,7 +89,9 @@ static void create_image_2(void)
 void test_jdpgd_align_tile(void)
 {
     /* Temporarily remove libjpeg_turbo decoder */
+#if LV_USE_LIBJPEG_TURBO
     lv_libjpeg_turbo_deinit();
+#endif
 
     create_image_2();
     TEST_ASSERT_EQUAL_SCREENSHOT("libs/jpg_3.png");
@@ -102,7 +110,9 @@ void test_jdpgd_align_tile(void)
     TEST_ASSERT_MEM_LEAK_LESS_THAN(mem_before, 0);
 
     /* Re-add libjpeg_turbo decoder */
+#if LV_USE_LIBJPEG_TURBO
     lv_libjpeg_turbo_init();
+#endif
 }
 
 #endif

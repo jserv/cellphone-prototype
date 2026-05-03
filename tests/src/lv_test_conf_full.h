@@ -79,7 +79,9 @@
 #define LV_USE_BMP          1
 #define LV_USE_TJPGD        1
 #ifndef _WIN32
-    #define LV_USE_LIBJPEG_TURBO       1
+    #ifndef LV_USE_LIBJPEG_TURBO
+        #define LV_USE_LIBJPEG_TURBO   1
+    #endif
     #ifndef LV_USE_LIBWEBP /* If WebP library is not found, defaulting to 0 in CMakeLists.txt */
         #define LV_USE_LIBWEBP             1
     #endif

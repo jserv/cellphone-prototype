@@ -540,7 +540,7 @@ void test_dropdown_properties(void)
 #endif
 }
 
-void test_dropdown_content_size()
+void test_dropdown_content_size(void)
 {
     lv_obj_t * dd = lv_dropdown_create(lv_screen_active());
     lv_dropdown_set_options(dd, "Short\nA bit longer option\nThe longest option in the list");

@@ -76,20 +76,27 @@ def get_build_dir(options_name):
 def gen_wayland_protocols(clean):
     '''Generates the xdg shell interface from wayland protocol definitions'''
 
+    wayland_scanner = shutil.which("wayland-scanner")
+    xdg_shell_xml = os.path.join(wayland_protocols_dir, "stable/xdg-shell/xdg-shell.xml")
+
     if clean:
         delete_dir_ignore_missing(wayland_dir)
 
+    if wayland_scanner is None or not os.path.isfile(xdg_shell_xml):
+        print("Skipping Wayland protocol generation: scanner or protocol XML not available")
+        return
+
     if not os.path.isdir(wayland_dir):
         os.mkdir(wayland_dir)
-        subprocess.check_call(['wayland-scanner',
+        subprocess.check_call([wayland_scanner,
             'client-header',
-            os.path.join(wayland_protocols_dir, "stable/xdg-shell/xdg-shell.xml"),
+            xdg_shell_xml,
             os.path.join(wayland_dir, "wayland_xdg_shell.h.original"),
         ])
 
-        subprocess.check_call(['wayland-scanner',
+        subprocess.check_call([wayland_scanner,
             'private-code',
-            os.path.join(wayland_protocols_dir, "stable/xdg-shell/xdg-shell.xml"),
+            xdg_shell_xml,
             os.path.join(wayland_dir, "wayland_xdg_shell.c.original"),
         ])
 
