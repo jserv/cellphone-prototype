@@ -1,0 +1,206 @@
+demos/cellphone/lv_demo_cellphone_photo.c
+  9b993676568b5c35 1-94,98-114,116-236,241-254
+  2e767b5a01ab94ed 95-97,115,238-240
+  0389146b81808f3e 237
+demos/cellphone/lv_demo_cellphone_sms.c
+  9b993676568b5c35 1-43,45-206,211-253,255,257,266-269,272-346
+  2e767b5a01ab94ed 44,207-210,254,256,258-265,270-271
+demos/cellphone/mem_report.c
+  9b993676568b5c35 1-36,38-275
+demos/cellphone/lv_demo_cellphone_statusbar.h
+  9b993676568b5c35 1-26
+demos/cellphone/lv_demo_cellphone_home.h
+  9b993676568b5c35 1-25
+demos/cellphone/assets/generated/img_icon_clock.c
+  9b993676568b5c35 1-100
+lv_conf_template.h
+  9b993676568b5c35 724-732,1553-1559
+demos/cellphone/assets/generated/img_icon_sms.c
+  9b993676568b5c35 1-100
+demos/cellphone/lv_demo_cellphone_calllog.h
+  9b993676568b5c35 1-22
+demos/cellphone/lv_demo_cellphone_lock.c
+  9b993676568b5c35 1-111,113-223
+  2e767b5a01ab94ed 112
+demos/cellphone/lv_demo_cellphone_dialer.h
+  9b993676568b5c35 1-35
+demos/cellphone/lv_demo_cellphone_settings.c
+  9b993676568b5c35 1-43,48-323,325-337,344-365
+  2e767b5a01ab94ed 44-47,324,338-343
+demos/cellphone/main_test.c
+  9b993676568b5c35 1-58,60-116,168-220,245-396,398-400,529-569,571,573,575-581,583,585-587,589,591-593,595,597,599-608,619-648,650-682,686,690,694,698-699,708-726,728,730-732,745-789
+  aaa7c7a207a8df17 59,117-167,221-244,401-528,570,572,574,582,584,588,590,594,596,598,609-618,649,683-685,687-689,691-693,695-697,700-707,727,729,733-744,882,892,955-959
+  a48a5616808d1828 397
+demos/cellphone/lv_demo_cellphone.c
+  9b993676568b5c35 1-151,159-170,176-182,188-213,215-236,238-534,536-569,572,594-599,618-624,630-674,677-736,744-782
+  aaa7c7a207a8df17 152-158,171-175,183-187,237,535,573-593,607-617,625-629,675-676,812-816
+  a48a5616808d1828 214,570-571,600-606,737-743
+demos/cellphone/lv_demo_cellphone_calllog.c
+  9b993676568b5c35 1-114
+demos/lv_demos.h
+  9b993676568b5c35 52-55
+demos/cellphone/assets/generated/img_icon_photo.c
+  9b993676568b5c35 1-100
+demos/cellphone/lv_demo_cellphone_data.c
+  9b993676568b5c35 1-138
+demos/cellphone/lv_demo_cellphone_camera.c
+  9b993676568b5c35 1-120
+demos/lv_demos.c
+  9b993676568b5c35 64-67
+demos/cellphone/main_sdl.c
+  9b993676568b5c35 1-51
+demos/cellphone/lv_demo_cellphone_skin.c
+  9b993676568b5c35 1-460
+demos/cellphone/lv_demo_cellphone_calc.h
+  9b993676568b5c35 1-27
+demos/cellphone/lv_demo_cellphone_dialer.c
+  9b993676568b5c35 1-32,34-54,62-92,122-162,183-185,187-191,193-293
+  aaa7c7a207a8df17 33,93-116,163-182,186,192
+  2e767b5a01ab94ed 55-61,117-121
+demos/cellphone/assets/generated/img_icon_phone.c
+  9b993676568b5c35 1-100
+demos/cellphone/build.sh
+  9b993676568b5c35 1-247
+demos/cellphone/lv_demo_cellphone.h
+  9b993676568b5c35 1-55
+demos/cellphone/lv_demo_cellphone_home.c
+  9b993676568b5c35 1-22,24-27,30-38,40-49,51-67,69-189,193-196,198,200,205,216,221-223,230-234,236-239,241-246,275-279
+  2e767b5a01ab94ed 23,28-29,39,50,68,190-192,197,199,201-204,206-215,217-220,224-229,235,240,247-274
+demos/cellphone/lv_demo_cellphone_navbar.h
+  9b993676568b5c35 1-42
+demos/cellphone/lv_demo_cellphone_contacts.c
+  9b993676568b5c35 1-92,97-106,108-203
+  2e767b5a01ab94ed 93-96,107
+demos/cellphone/lv_demo_cellphone_contacts.h
+  9b993676568b5c35 1-22
+demos/cellphone/lv_demo_cellphone_anim.c
+  9b993676568b5c35 1-164
+demos/cellphone/lv_demo_cellphone_data.h
+  9b993676568b5c35 1-94
+demos/cellphone/assets/generated/img_icon_calc.c
+  9b993676568b5c35 1-100
+demos/cellphone/assets/generated/img_icon_contacts.c
+  9b993676568b5c35 1-100
+demos/cellphone/lv_demo_cellphone_settings.h
+  9b993676568b5c35 1-22
+demos/cellphone/assets/generated/img_icon_settings.c
+  9b993676568b5c35 1-100
+demos/cellphone/config/lv_conf.h
+  9b993676568b5c35 1-57,60-68
+  aaa7c7a207a8df17 58-59
+demos/cellphone/lv_demo_cellphone_navbar.c
+  9b993676568b5c35 1-230
+demos/cellphone/lv_demo_cellphone_statusbar.c
+  9b993676568b5c35 1-69
+demos/cellphone/lv_demo_cellphone_softkbd.c
+  9b993676568b5c35 1-391
+demos/cellphone/lv_demo_cellphone_softkbd.h
+  9b993676568b5c35 1-70
+demos/cellphone/lv_demo_cellphone_anim.h
+  9b993676568b5c35 1-77
+demos/cellphone/assets/generated/img_icon_music.c
+  9b993676568b5c35 1-100
+demos/cellphone/lv_demo_cellphone_common.h
+  9b993676568b5c35 1-149,170-226,233-297
+  aaa7c7a207a8df17 150-169,227-232
+demos/cellphone/lv_demo_cellphone_skin.h
+  9b993676568b5c35 1-168
+demos/cellphone/README.md
+  9b993676568b5c35 1-189,191-216,218-230,232-236,238-275
+  aaa7c7a207a8df17 190,217,231,237
+demos/cellphone/config/lv_conf_mcu.h
+  9b993676568b5c35 1-14,16-23,27-36,38-42,44-46,48-50,52-54,56-61,66-71,73-76,88-97
+  aaa7c7a207a8df17 15,24-26,37,43,47,51,55,62-65,72,77-87
+demos/cellphone/lv_demo_cellphone_music.h
+  9b993676568b5c35 1-22
+demos/cellphone/lv_demo_cellphone_sms.h
+  9b993676568b5c35 1-30
+env_support/cmake/main.cmake
+  9b993676568b5c35 72
+demos/cellphone/lv_demo_cellphone_calc.c
+  9b993676568b5c35 1-22,24-27,29-30,32-58,60,63-66,108-179,181-185,188-211,263-336,338,357,361-397
+  aaa7c7a207a8df17 23,31,59,61-62,67-107,180,337,339-356,358-360
+  a48a5616808d1828 28,186-187,212-262
+demos/cellphone/lv_demo_cellphone_camera.h
+  9b993676568b5c35 1-27
+demos/cellphone/lv_demo_cellphone_lock.h
+  9b993676568b5c35 1-22
+demos/cellphone/lv_demo_cellphone_music.c
+  9b993676568b5c35 1-299
+demos/cellphone/lv_demo_cellphone_photo.h
+  9b993676568b5c35 1-22
+demos/cellphone/config/lv_conf_mcu_test.h
+  aaa7c7a207a8df17 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "3741c1ed20b1143a1c6d332b2da420cc9634e248",
+  "prompts": {
+    "0389146b81808f3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dee96-6f33-7090-a3e5-f6313f45bfa9",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "2e767b5a01ab94ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "400da724-60a1-4c82-b991-cf0fb3d13b92",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 118,
+      "overriden_lines": 0
+    },
+    "9b993676568b5c35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ab2ba58-790c-4d01-ad91-8c1039c94fd3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 32,
+      "total_deletions": 0,
+      "accepted_lines": 8168,
+      "overriden_lines": 0
+    },
+    "a48a5616808d1828": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deb8e-2f3a-7c53-a5d3-4aa23aaa5fbe",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 72,
+      "overriden_lines": 0
+    },
+    "aaa7c7a207a8df17": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019deb9b-7454-75b3-b315-53e90f72869e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 546,
+      "overriden_lines": 0
+    }
+  }
+}
