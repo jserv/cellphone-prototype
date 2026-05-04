@@ -1,0 +1,61 @@
+include/lvgl/font/lv_font_vec.h
+  db24ac2e9240e513 1-144,162-167
+  aab0fd682534f595 145-161,179-206
+scripts/built_in_font/twin-ttf-lvgl.c
+  db24ac2e9240e513 1-111
+src/font/font_vec/lv_font_vec.c
+  db24ac2e9240e513 18-19
+  aab0fd682534f595 280-284,448-458,470-505
+src/font/font_vec/lv_font_vec_default_roman.c
+  db24ac2e9240e513 11
+src/font/font_vec/lv_font_vec_montserrat.c
+  db24ac2e9240e513 4
+lv_conf_template.h
+  9b993676568b5c35 724-732
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e7439a66ecf681c731c883b691efc6e9be2fa46c",
+  "prompts": {
+    "9b993676568b5c35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ab2ba58-790c-4d01-ad91-8c1039c94fd3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 32,
+      "total_deletions": 0,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    },
+    "aab0fd682534f595": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a3ea0e1-1fb5-432a-bca3-ebb97cec8a4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 41372,
+      "total_deletions": 7,
+      "accepted_lines": 97,
+      "overriden_lines": 0
+    },
+    "db24ac2e9240e513": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "60c6fbc9-f654-48d9-8119-bde095ce5fb1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 16567,
+      "total_deletions": 9628,
+      "accepted_lines": 265,
+      "overriden_lines": 0
+    }
+  }
+}
