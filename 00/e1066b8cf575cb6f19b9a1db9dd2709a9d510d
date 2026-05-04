@@ -1,0 +1,27 @@
+demos/cellphone/CLAUDE.md
+  aab0fd682534f595 1-141
+demos/cellphone/config/lv_conf_mcu.h
+  aab0fd682534f595 68-69,105
+demos/cellphone/config/lv_conf_mcu_test.h
+  aab0fd682534f595 10-11,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "00e1066b8cf575cb6f19b9a1db9dd2709a9d510d",
+  "prompts": {
+    "aab0fd682534f595": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a3ea0e1-1fb5-432a-bca3-ebb97cec8a4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 423,
+      "overriden_lines": 0
+    }
+  }
+}
