@@ -1,0 +1,36 @@
+demos/cellphone/main_test.c
+  bd908cef685771a8 63-71,97-126,135,418-518,580,646,652,688-694,701,741,821,853-1151,1294-1295,1572-1592
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "78aeaf3d2e72b334e52e2cdfdb8e77c244a7295a",
+  "prompts": {
+    "4a5338e5e720a3df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "05f5cb66-6d4b-47ee-b997-41b63a5c7276",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 331,
+      "total_deletions": 222,
+      "accepted_lines": 250,
+      "overriden_lines": 0
+    },
+    "bd908cef685771a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2fcc2314-08ee-4036-9c12-2e5877de2ff1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "messages": [],
+      "total_additions": 56802,
+      "total_deletions": 293,
+      "accepted_lines": 575,
+      "overriden_lines": 2
+    }
+  }
+}
