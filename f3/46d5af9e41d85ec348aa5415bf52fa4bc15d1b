@@ -1,0 +1,37 @@
+demos/cellphone/main_test.c
+  bd908cef685771a8 70,94-95,372,383-385,391,395-397,403,405,407-408,1014
+  2e1970d774fdf197 327
+demos/cellphone/README.md
+  2e1970d774fdf197 272
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "f346d5af9e41d85ec348aa5415bf52fa4bc15d1b",
+  "prompts": {
+    "2e1970d774fdf197": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61552eae-90fb-4c6e-9b7e-443c43a4e8af",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 812,
+      "total_deletions": 556,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "bd908cef685771a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2fcc2314-08ee-4036-9c12-2e5877de2ff1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 56802,
+      "total_deletions": 293,
+      "accepted_lines": 16,
+      "overriden_lines": 0
+    }
+  }
+}
