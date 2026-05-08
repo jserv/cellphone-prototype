@@ -1,0 +1,48 @@
+demos/cellphone/config/lv_conf.h
+  s_d417a7a1fcb2f4::t_aa2d433a90dbb6 24-25
+demos/cellphone/main_test.c
+  bd908cef685771a8 70,94-95,327-329,362-363,367,372,383-385,391,395-397,403,405,407-408,1014
+demos/cellphone/README.md
+  2e1970d774fdf197 272
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "a6ccfb441a0c3b91c93a689d8b00a94078987b1d",
+  "prompts": {
+    "2e1970d774fdf197": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61552eae-90fb-4c6e-9b7e-443c43a4e8af",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 812,
+      "total_deletions": 556,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "bd908cef685771a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2fcc2314-08ee-4036-9c12-2e5877de2ff1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 56802,
+      "total_deletions": 293,
+      "accepted_lines": 22,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_d417a7a1fcb2f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e0397-468a-7230-8fad-7ff1ef53f444",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}

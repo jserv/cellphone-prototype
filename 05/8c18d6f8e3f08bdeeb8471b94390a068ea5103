@@ -1,0 +1,19 @@
+src/font/font_vec/lv_font_vec.c
+  s_98df2fda793ad6::t_6a77628e7a9967 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "058c18d6f8e3f08bdeeb8471b94390a068ea5103",
+  "prompts": {},
+  "sessions": {
+    "s_98df2fda793ad6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a4da3bb-9e3a-4c8e-bca0-cced0cd06765",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}

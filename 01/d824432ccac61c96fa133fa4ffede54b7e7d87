@@ -1,0 +1,22 @@
+src/widgets/chart/lv_chart.c
+  aab0fd682534f595 1237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "01d824432ccac61c96fa133fa4ffede54b7e7d87",
+  "prompts": {
+    "aab0fd682534f595": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a3ea0e1-1fb5-432a-bca3-ebb97cec8a4c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
