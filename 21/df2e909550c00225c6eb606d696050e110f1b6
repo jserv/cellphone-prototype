@@ -1,0 +1,51 @@
+demos/cellphone/lv_demo_cellphone_data.h
+  s_6a71d0703f5b57::t_69eb8b21391948 32-33
+  s_6a71d0703f5b57::t_7ca9e5a5464c23 34
+demos/cellphone/lv_demo_cellphone_game.c
+  s_6a71d0703f5b57::t_31d1059a61efe7 1-178,185-273,275-300,302-303,305-796
+  s_6a71d0703f5b57::t_896f4890ee77c2 179-181,184
+  s_6a71d0703f5b57::t_d67942320efb9b 182-183
+demos/cellphone/lv_demo_cellphone.c
+  s_6a71d0703f5b57::t_c5bdb4115b7eac 34
+demos/cellphone/lv_demo_cellphone_data.c
+  s_6a71d0703f5b57::t_15aae2be93c5aa 37-38
+  s_6a71d0703f5b57::t_dcbd17f3a093bc 14,29-36,39-58
+  s_6a71d0703f5b57::t_1cf54bbe59697a 109-113
+  s_6a71d0703f5b57::t_92e232fb2edc03 89-93,118-138
+demos/cellphone/lv_demo_cellphone_game.h
+  s_6a71d0703f5b57::t_1f30d7a6a595c7 1-30
+demos/cellphone/main_test.c
+  s_6a71d0703f5b57::t_499f0ee1720ab4 29
+  s_6a71d0703f5b57::t_a5048991583d3d 1221-1238
+demos/cellphone/lv_demo_cellphone_contacts.c
+  s_6a71d0703f5b57::t_711f13b656c739 178
+  s_6a71d0703f5b57::t_4224940b951aa4 275-283
+  s_6a71d0703f5b57::t_b775f93b22ffbc 30
+  s_6a71d0703f5b57::t_2073fde56b7d92 298-304
+  s_6a71d0703f5b57::t_aa0862cfb692cc 346-362
+  s_6a71d0703f5b57::t_7412384b9a53d0 149-159
+  s_6a71d0703f5b57::t_2d46882c0c1ae2 221-226
+  s_6a71d0703f5b57::t_b6152e500c9839 274,284-286
+  s_6a71d0703f5b57::t_7000920d961e5f 40-41
+  s_6a71d0703f5b57::t_a252bb6e51dc58 68
+  s_6a71d0703f5b57::t_fb305f333b0888 429-430
+  s_6a71d0703f5b57::t_78be1854b8b7b7 492-493
+  s_6a71d0703f5b57::t_3673b353ab0cf4 500-501
+  s_6a71d0703f5b57::t_82e61b9ddef1df 129-131,136,139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "21df2e909550c00225c6eb606d696050e110f1b6",
+  "prompts": {},
+  "sessions": {
+    "s_6a71d0703f5b57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11fbf54f-fef4-455a-b941-1247313745b1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
