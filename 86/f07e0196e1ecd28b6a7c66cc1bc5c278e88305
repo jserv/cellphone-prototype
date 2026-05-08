@@ -1,0 +1,23 @@
+demos/cellphone/lv_demo_cellphone_sms.c
+  s_25ce14e08ac6d9::t_56fefb73c24250 402
+  s_25ce14e08ac6d9::t_37793e9a365085 241
+  s_25ce14e08ac6d9::t_4e105b0ebf7d3f 337-351
+  s_25ce14e08ac6d9::t_123b22aa44dd3a 36
+  s_25ce14e08ac6d9::t_4d0822f1ac1044 362-364,377
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "86f07e0196e1ecd28b6a7c66cc1bc5c278e88305",
+  "prompts": {},
+  "sessions": {
+    "s_25ce14e08ac6d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1b4034f7-b241-4dd7-94e5-c3a9ff5110cd",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
