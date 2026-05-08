@@ -247,6 +247,7 @@ static lv_obj_t * now_playing_create(lv_obj_t * parent)
     /* album name */
     s_album_label = cellphone_label(parent, t->album,
                                     CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT_SEC);
+    lv_obj_set_style_text_letter_space(s_album_label, 1, 0);
 
     /* track title */
     s_title_label = cellphone_label(parent, t->title,

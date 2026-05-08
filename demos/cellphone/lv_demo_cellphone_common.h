@@ -104,7 +104,7 @@ typedef struct {
 uint32_t cellphone_theme_count(void);
 
 /**
- * Get a built-in theme by index (0 = Retro Olive, 1 = Dark).
+ * Get a built-in theme by index (0 = Olive, 1 = Dark).
  */
 const cellphone_theme_t * cellphone_theme_get(uint32_t idx);
 

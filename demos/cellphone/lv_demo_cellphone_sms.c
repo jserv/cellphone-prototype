@@ -83,6 +83,7 @@ lv_obj_t * cellphone_sms_create(lv_obj_t * parent)
                                              CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT_SEC);
         lv_label_set_long_mode(preview, LV_LABEL_LONG_DOT);
         lv_obj_set_width(preview, CELLPHONE_CONTENT_W - 24);
+        lv_obj_set_style_text_letter_space(preview, 1, 0);
 
         /* timestamp on the right side of the name */
         lv_obj_t * ts = cellphone_label(btn, threads[i].timestamp,

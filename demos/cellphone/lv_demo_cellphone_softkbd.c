@@ -49,11 +49,12 @@ static void softkbd_hide_finish_cb(lv_anim_t * a);
 
 /* Cellphone-friendly layout — 10/9/9/4 instead of LVGL's default 12/11/12/5.
  *
- * Glyph notes for the bundled vec Montserrat font:
- *   Renderable FA glyphs: LV_SYMBOL_CLOSE (F00D), LV_SYMBOL_BACKSPACE
- *   (F55A), LV_SYMBOL_RIGHT (F054), and a few media/status icons.
+ * Glyph notes for the bundled icon fallback subset:
+ *   Renderable here: LV_SYMBOL_CLOSE (F00D), LV_SYMBOL_BACKSPACE
+ *   (F55A), LV_SYMBOL_RIGHT (F054), and the media/status icons used
+ *   elsewhere in the demo.
  *   LV_SYMBOL_OK (F00C), LV_SYMBOL_KEYBOARD (F11C) and
- *   LV_SYMBOL_NEW_LINE (F8A2) DO NOT render — never use them here.
+ *   LV_SYMBOL_NEW_LINE (F8A2) still do not render — never use them here.
  *
  * lv_keyboard's default value-changed handler recognizes:
  *   "abc"/"ABC"/"1#" — mode switches

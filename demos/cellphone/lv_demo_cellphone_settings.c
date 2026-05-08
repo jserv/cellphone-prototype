@@ -268,6 +268,7 @@ static lv_obj_t * setting_dropdown(lv_obj_t * page, const char * label,
     lv_obj_t * dd = lv_dropdown_create(cont);
     lv_obj_set_flex_grow(dd, 1);
     lv_obj_set_style_text_font(dd, CELLPHONE_FONT_SM, 0);
+    lv_obj_set_style_text_letter_space(dd, 1, 0);
     lv_dropdown_set_options(dd, opts);
     lv_dropdown_set_selected(dd, selected);
     style_dropdown_list(dd);
@@ -311,11 +312,14 @@ static void style_dropdown_list(lv_obj_t * dd)
      * LV_PART_SELECTED for the highlighted item overlay). */
     lv_obj_set_style_text_font(list, font, 0);
     lv_obj_set_style_text_font(list, font, LV_PART_SELECTED);
+    lv_obj_set_style_text_letter_space(list, 1, 0);
+    lv_obj_set_style_text_letter_space(list, 1, LV_PART_SELECTED);
 
     /* Also set font directly on the label child so it does not
      * fall back to the zero-glyph LV_FONT_DEFAULT stub. */
     if(label) {
         lv_obj_set_style_text_font(label, font, 0);
+        lv_obj_set_style_text_letter_space(label, 1, 0);
     }
 }
 

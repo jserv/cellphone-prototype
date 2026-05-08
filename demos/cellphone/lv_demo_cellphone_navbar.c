@@ -29,11 +29,9 @@ typedef struct {
     const char * label;
 } navbar_tab_def_t;
 
-/* Glyph picks are constrained to the 17 FA5 codepoints actually present in
- * lv_font_vec_montserrat.c. LV_SYMBOL_DIRECTORY (U+F07B) is *not* there and
- * silently renders as missing-glyph. The middle tab is named "Home" (not
- * "Menu") so the HOME glyph and the "go-home" action agree -- a HOME glyph
- * under a "Menu" label was a semantic mismatch. */
+/* Glyph picks are constrained to the icon fallback subset wired in
+ * lv_demo_cellphone.c. The middle tab is named "Home" (not "Menu") so the
+ * HOME glyph and the "go-home" action agree. */
 static const navbar_tab_def_t s_tabs[NAV_TAB_COUNT] = {
     [NAV_TAB_DIALER]   = { LV_SYMBOL_CALL, "Dialer"   },
     [NAV_TAB_MENU]     = { LV_SYMBOL_HOME, "Home"     },

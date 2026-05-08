@@ -46,6 +46,7 @@
  **********************/
 
 #if LV_USE_FONT_VEC
+    extern const lv_font_vec_data_t lv_font_vec_cellphone_icons_data;
     extern const lv_font_vec_data_t lv_font_vec_Montserrat_data;
 
     static lv_font_t s_vec_font_12;
@@ -53,6 +54,15 @@
     static lv_font_t s_vec_font_16;
     static lv_font_t s_vec_font_22;
     static lv_font_t s_vec_font_32;
+    /* No icon-fallback at FONT_SM (12 px): the demo never renders an
+    * LV_SYMBOL_* glyph at this size (verified by source audit -- sm is
+    * used for body-text, secondaries, list rows, dropdowns, all ASCII).
+    * Dropping the instance saves an lv_font_t + lv_font_vec_dsc_t and
+    * one L1-cache refcount slot. */
+    static lv_font_t s_vec_icon_font_14;
+    static lv_font_t s_vec_icon_font_16;
+    static lv_font_t s_vec_icon_font_22;
+    static lv_font_t s_vec_icon_font_32;
     static bool s_vec_fonts_ready = false;
 #endif /* LV_USE_FONT_VEC */
 
@@ -145,17 +155,16 @@ static uint32_t s_active_theme_idx = 0;
 static void vec_fonts_init(void)
 {
     if(s_vec_fonts_ready) return;
-    /* Montserrat TTF outlines -- filled contours, direct rasterization.
-     * Stroke conversion via medial-axis extraction was tried and produced
-     * fragmented skeletons; pen convolution also degrades below 14 px. */
-    const lv_font_vec_data_t * d = &lv_font_vec_Montserrat_data;
-    /* Per-font L2 budgets. The hot caches (sm/normal) remain enabled but
-     * are configurable so the MCU profile can spend less SRAM than the SDL
-     * config without changing any rendered pixels. The non-SDL path trims
-     * 12/14 px to 1.5 KiB and 22 px to 1 KiB: enough to keep the common
-     * UI/digit glyphs warm, while cutting a few KiB from the live cache
-     * ceiling. Test code reads these same macros back when asserting the
-     * configured budgets.
+    const lv_font_vec_data_t * text_d = &lv_font_vec_Montserrat_data;
+    const lv_font_vec_data_t * icon_d = &lv_font_vec_cellphone_icons_data;
+    /* Unified strategy:
+     * - All text sizes use the filled Montserrat outlines for cleaner
+     *   body text, labels, clocks, and numeric readouts.
+     * - The icon subset remains a separate fallback so text does not
+     *   carry duplicate FA outlines.
+     *
+     * Per-font L2 budgets remain configurable so the MCU profile can spend
+     * less SRAM than the SDL config without changing any rendered pixels.
      *
      * The other three fonts are disabled outright -- their callers are
      * predominantly static after first paint, so the cached bitmap +
@@ -180,11 +189,48 @@ static void vec_fonts_init(void)
      * Repeated characters in a single label ("00:00") with the cache
      * disabled rasterize once per occurrence rather than per unique
      * glyph; profile if a workload changes. */
-    lv_font_vec_init_ex(&s_vec_font_12, d, 12, LV_DEMO_CELLPHONE_FONT_CACHE_SM);
-    lv_font_vec_init_ex(&s_vec_font_14, d, 14, LV_DEMO_CELLPHONE_FONT_CACHE_NORMAL);
-    lv_font_vec_init_ex(&s_vec_font_16, d, 16, LV_DEMO_CELLPHONE_FONT_CACHE_HEADING);
-    lv_font_vec_init_ex(&s_vec_font_22, d, 22, LV_DEMO_CELLPHONE_FONT_CACHE_LARGE);
-    lv_font_vec_init_ex(&s_vec_font_32, d, 32, LV_DEMO_CELLPHONE_FONT_CACHE_CLOCK);
+    /* Init-result checking: lv_font_vec_init_ex returns LV_RESULT_INVALID
+     * on allocator failure or invalid pixel size, leaving the lv_font_t
+     * zeroed. Without checking, a later draw would deref a NULL
+     * get_glyph_dsc via lv_font_get_glyph_dsc_fmt -> fallback chain. */
+    /* Text faces. Aligned with `text_caches` and `text_sizes` below. */
+    lv_font_t * const text_fonts[] = {
+        &s_vec_font_12, &s_vec_font_14, &s_vec_font_16,
+        &s_vec_font_22, &s_vec_font_32,
+    };
+    static const int32_t text_sizes[] = { 12, 14, 16, 22, 32 };
+    static const uint32_t text_caches[] = {
+        LV_DEMO_CELLPHONE_FONT_CACHE_SM,
+        LV_DEMO_CELLPHONE_FONT_CACHE_NORMAL,
+        LV_DEMO_CELLPHONE_FONT_CACHE_HEADING,
+        LV_DEMO_CELLPHONE_FONT_CACHE_LARGE,
+        LV_DEMO_CELLPHONE_FONT_CACHE_CLOCK,
+    };
+    /* Icon faces: only sizes the demo actually paints LV_SYMBOL_* at.
+     * Index 0 here pairs with text_fonts[1] (size 14, &s_vec_font_14),
+     * not text_fonts[0] -- s_vec_font_12 has no fallback by design. */
+    lv_font_t * const icon_fonts[] = {
+        &s_vec_icon_font_14, &s_vec_icon_font_16,
+        &s_vec_icon_font_22, &s_vec_icon_font_32,
+    };
+    static const int32_t icon_sizes[] = { 14, 16, 22, 32 };
+    static const uint32_t icon_text_idx[] = { 1, 2, 3, 4 };
+    const uint32_t n_text = sizeof(text_sizes) / sizeof(text_sizes[0]);
+    const uint32_t n_icon = sizeof(icon_sizes) / sizeof(icon_sizes[0]);
+    uint32_t text_ok = 0, icon_ok = 0;
+
+    for(uint32_t i = 0; i < n_text; i++) {
+        if(lv_font_vec_init_ex(text_fonts[i], text_d, text_sizes[i], text_caches[i])
+           != LV_RESULT_OK) goto fail;
+        text_ok = i + 1;
+    }
+    /* Icon fallback face: sparse FA5 subset, L2 disabled (cache_size=0)
+     * because these glyphs are mostly static after first paint. */
+    for(uint32_t i = 0; i < n_icon; i++) {
+        if(lv_font_vec_init_ex(icon_fonts[i], icon_d, icon_sizes[i], 0) != LV_RESULT_OK) goto fail;
+        icon_ok = i + 1;
+        text_fonts[icon_text_idx[i]]->fallback = icon_fonts[i];
+    }
 
     /* Patch every theme's font slots so cellphone_theme_active() can
      * return a direct pointer instead of rebuilding a copy each call. */
@@ -197,6 +243,19 @@ static void vec_fonts_init(void)
     }
 
     s_vec_fonts_ready = true;
+    return;
+
+fail:
+    /* Unwind: deinit any fonts we already brought up so a retry from a
+     * fresh allocator state starts clean. lv_font_vec_deinit is a no-op
+     * on a font whose dsc is still NULL (the failed call's target). */
+    LV_LOG_ERROR("vec font init failed (text_ok=%u icon_ok=%u)",
+                 (unsigned)text_ok, (unsigned)icon_ok);
+    for(uint32_t i = 0; i < icon_ok; i++) lv_font_vec_deinit(icon_fonts[i]);
+    for(uint32_t i = 0; i < text_ok; i++) {
+        text_fonts[i]->fallback = NULL;
+        lv_font_vec_deinit(text_fonts[i]);
+    }
 }
 #endif /* LV_USE_FONT_VEC */
 
@@ -359,6 +418,14 @@ static void demo_default_theme_sync(void)
 {
 #if LV_USE_FONT_VEC
     vec_fonts_init();
+    if(!s_vec_fonts_ready) {
+        /* Init failed (allocator). Don't hand a NULL-callback font to the
+         * theme: that would crash on the first paint via the fallback
+         * walk in lv_font_get_glyph_dsc_fmt. Leaving the theme on its
+         * existing font keeps the system alive (text renders via the
+         * zero-glyph stub) so a higher level can recover. */
+        return;
+    }
 
     /* Demo config sets LV_FONT_DEFAULT to a zero-glyph stub; route LVGL's
      * built-in widgets through the real vec font and the active palette. */
