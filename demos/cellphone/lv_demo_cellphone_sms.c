@@ -5,6 +5,7 @@
  */
 
 #include "lv_demo_cellphone_sms.h"
+#include "lv_demo_cellphone_anim.h"
 #include "lv_demo_cellphone_data.h"
 #include "lv_demo_cellphone_softkbd.h"
 
@@ -50,6 +51,8 @@ static void append_bubble(lv_obj_t * cont, const char * text,
 static void chat_apply_kb_layout(bool kb_visible);
 static void chat_send_message(void);
 static void chat_refresh_compose_state(void);
+static void chat_layout_reflow(bool animated);
+static void chat_reflow_done_cb(lv_anim_t * a);
 
 /*********************
  *   GLOBAL FUNCTIONS
@@ -152,14 +155,9 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
      * header so chrome reads consistently across the app. The size
      * macro is also used by chat_apply_kb_layout(); using it directly
      * here keeps both paths anchored to a single source of truth. */
-    lv_obj_t * header = cellphone_obj_bar(parent, CELLPHONE_COLOR_NAVBAR_GRAD,
-                                          CELLPHONE_COLOR_NAVBAR);
+    lv_obj_t * header = cellphone_section_header(parent, thread->contact_name,
+                                                 LV_ALIGN_CENTER, NULL);
     lv_obj_set_pos(header, 0, 0);
-    lv_obj_set_size(header, CELLPHONE_CONTENT_W, CELLPHONE_SECTION_HDR_H);
-    lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_t * title = cellphone_label(header, thread->contact_name,
-                                       CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT);
-    lv_obj_align(title, LV_ALIGN_CENTER, 0, 0);
 
     int32_t container_h = CELLPHONE_CONTENT_H - SMS_INPUT_H - CELLPHONE_SECTION_HDR_H;
 
@@ -283,7 +281,7 @@ static void chat_input_event_cb(lv_event_t * e)
         if(cellphone_softkbd_is_visible()) return;
 
         cellphone_softkbd_show(s_chat_parent, s_chat_input);
-        chat_apply_kb_layout(true);
+        chat_layout_reflow(true);
         return;
     }
 
@@ -309,7 +307,7 @@ static void chat_background_event_cb(lv_event_t * e)
 
 static void chat_kb_hidden_cb(void)
 {
-    chat_apply_kb_layout(false);
+    chat_layout_reflow(true);
 }
 
 /**
@@ -330,6 +328,51 @@ static void chat_apply_kb_layout(bool kb_visible)
     lv_obj_set_y(s_chat_input_row, CELLPHONE_CONTENT_H - SMS_INPUT_H - kb_h);
     /* Keep the latest message in view as the container resizes. */
     lv_obj_scroll_to_y(s_chat_container, LV_COORD_MAX, LV_ANIM_OFF);
+}
+
+static void chat_reflow_done_cb(lv_anim_t * a)
+{
+    /* Snap the scroll to the bottom only after the container has settled
+     * at its final height. Calling lv_obj_scroll_to_y mid-animation would
+     * compute the target offset against the still-shrinking geometry,
+     * leaving a visible gap below the latest bubble. */
+    lv_obj_t * cont = (lv_obj_t *)lv_anim_get_user_data(a);
+    if(cont) lv_obj_scroll_to_y(cont, LV_COORD_MAX, LV_ANIM_OFF);
+}
+
+static void chat_layout_reflow(bool animated)
+{
+    bool kb_visible = cellphone_softkbd_is_visible();
+    int32_t kb_h = kb_visible ? cellphone_softkbd_height() : 0;
+    int32_t cont_h = (CELLPHONE_CONTENT_H - SMS_INPUT_H - CELLPHONE_SECTION_HDR_H) - kb_h;
+    int32_t row_y = CELLPHONE_CONTENT_H - SMS_INPUT_H - kb_h;
+
+    if(cont_h < 0) cont_h = 0;
+
+    if(!animated) {
+        chat_apply_kb_layout(kb_visible);
+        return;
+    }
+
+    if(!s_chat_container || !s_chat_input_row) return;
+
+    /* Drive the container height inline so we can hang a completed_cb on it
+     * to snap the scroll once the geometry is stable. */
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, s_chat_container);
+    lv_anim_set_exec_cb(&a, cellphone_anim_set_height_cb);
+    lv_anim_set_values(&a, lv_obj_get_height(s_chat_container), cont_h);
+    lv_anim_set_duration(&a, CELLPHONE_MOTION_QUICK.enter_ms);
+    lv_anim_set_path_cb(&a, CELLPHONE_MOTION_QUICK.path_cb);
+    lv_anim_set_user_data(&a, s_chat_container);
+    lv_anim_set_completed_cb(&a, chat_reflow_done_cb);
+    lv_anim_start(&a);
+
+    cellphone_anim_run(s_chat_input_row, cellphone_anim_set_y_cb,
+                       lv_obj_get_y(s_chat_input_row), row_y,
+                       CELLPHONE_MOTION_QUICK.enter_ms,
+                       CELLPHONE_MOTION_QUICK.path_cb);
 }
 
 static void chat_refresh_compose_state(void)

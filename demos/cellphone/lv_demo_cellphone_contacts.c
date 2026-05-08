@@ -30,31 +30,15 @@ lv_obj_t * cellphone_contacts_create(lv_obj_t * parent)
 {
     const cellphone_contact_t * contacts = cellphone_data_contacts();
 
-    /* Reference UI: a thin header strip above the list shows the section
-     * title ("All Contacts") on the left and a "+" affordance on the right.
-     * Use the navbar gradient palette so the strip reads as chrome, not a
-     * list row. Height tracks CELLPHONE_SECTION_HDR_H so large mode (28 px)
-     * matches the section dividers below. */
+    /* Section header strip with title on the left and a "+" affordance
+     * on the right. The "+" is visual only -- the demo has no add-contact
+     * flow, so the helper renders it as a plain label (no CLICKABLE, no
+     * pressed feedback) to keep the UI honest. ASCII "+" reads cleaner
+     * than LV_SYMBOL_PLUS at this small header height. */
     const int32_t header_h = CELLPHONE_SECTION_HDR_H;
-
-    lv_obj_t * header = cellphone_obj_bar(parent, CELLPHONE_COLOR_NAVBAR_GRAD,
-                                          CELLPHONE_COLOR_NAVBAR);
+    lv_obj_t * header = cellphone_section_header(parent, "All Contacts",
+                                                 LV_ALIGN_LEFT_MID, "+");
     lv_obj_set_pos(header, 0, 0);
-    lv_obj_set_size(header, CELLPHONE_CONTENT_W, header_h);
-    lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_t * title = cellphone_label(header, "All Contacts",
-                                       CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 8, 0);
-
-    /* The "+" is a visual affordance only -- the demo has no add-contact
-     * flow. Rendering it as a plain label (no LV_OBJ_FLAG_CLICKABLE, no
-     * pressed feedback) keeps the UI honest: nothing depresses, nothing
-     * lies about being interactive. ASCII "+" reads cleaner than
-     * LV_SYMBOL_PLUS at this small header height. */
-    lv_obj_t * add = cellphone_label(header, "+",
-                                     CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT);
-    lv_obj_align(add, LV_ALIGN_RIGHT_MID, -8, 0);
 
     lv_obj_t * list = lv_list_create(parent);
     lv_obj_set_pos(list, 0, header_h);

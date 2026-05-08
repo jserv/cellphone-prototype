@@ -45,6 +45,16 @@ void cellphone_anim_set_y_cb(void * var, int32_t v)
     lv_obj_set_y((lv_obj_t *)var, v);
 }
 
+void cellphone_anim_set_width_cb(void * var, int32_t v)
+{
+    lv_obj_set_width((lv_obj_t *)var, v);
+}
+
+void cellphone_anim_set_height_cb(void * var, int32_t v)
+{
+    lv_obj_set_height((lv_obj_t *)var, v);
+}
+
 void cellphone_anim_set_opa_cb(void * var, int32_t v)
 {
     lv_obj_set_style_opa((lv_obj_t *)var, (lv_opa_t)v, 0);
@@ -110,20 +120,23 @@ void cellphone_anim_pickup(lv_obj_t * obj)
 {
     cellphone_anim_run(obj, cellphone_anim_set_scale_cb,
                        PICKUP_SCALE_BASE, PICKUP_SCALE_RAISED,
-                       PICKUP_DURATION_MS, lv_anim_path_linear);
+                       PICKUP_DURATION_MS, lv_anim_path_ease_out);
     cellphone_anim_run(obj, cellphone_anim_set_opa_cb,
                        PICKUP_OPA_FULL, PICKUP_OPA_DIMMED,
-                       PICKUP_DURATION_MS, lv_anim_path_linear);
+                       PICKUP_DURATION_MS, lv_anim_path_ease_out);
 }
 
 void cellphone_anim_drop(lv_obj_t * obj)
 {
+    /* Mirror the easing used by cellphone_anim_pickup so a touch + release
+     * pair feels symmetric -- ease_out on both legs gives the standard
+     * "settles into place" curve. */
     cellphone_anim_run(obj, cellphone_anim_set_scale_cb,
                        PICKUP_SCALE_RAISED, PICKUP_SCALE_BASE,
-                       PICKUP_DURATION_MS, lv_anim_path_linear);
+                       PICKUP_DURATION_MS, lv_anim_path_ease_out);
     cellphone_anim_run(obj, cellphone_anim_set_opa_cb,
                        PICKUP_OPA_DIMMED, PICKUP_OPA_FULL,
-                       PICKUP_DURATION_MS, lv_anim_path_linear);
+                       PICKUP_DURATION_MS, lv_anim_path_ease_out);
 }
 
 void cellphone_anim_highlight_sweep(lv_obj_t * highlight, int32_t width)

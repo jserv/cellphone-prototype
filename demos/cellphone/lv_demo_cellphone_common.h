@@ -300,6 +300,16 @@ lv_obj_t * cellphone_obj_bar(lv_obj_t * parent, lv_color_t top, lv_color_t bot);
 void cellphone_obj_paint_grad(lv_obj_t * obj, lv_color_t top, lv_color_t bot);
 
 /**
+ * Create a standard section header strip used across list/detail screens.
+ * `title_align` controls how the title sits inside the bar (typically
+ * LV_ALIGN_LEFT_MID or LV_ALIGN_CENTER). When `trailing_text` is non-NULL
+ * and non-empty, a trailing label is added on the right.
+ */
+lv_obj_t * cellphone_section_header(lv_obj_t * parent, const char * title,
+                                    lv_align_t title_align,
+                                    const char * trailing_text);
+
+/**
  * Create a label, set its text, and apply the given font + color.
  * Pass `NULL` for `text` to leave the label empty (filled in later by
  * the caller). `font` must be non-NULL.

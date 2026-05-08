@@ -14,8 +14,10 @@
  *      DEFINES
  *********************/
 #define INDICATOR_DOT_SIZE   6
+#define INDICATOR_ACTIVE_W   18
 #define INDICATOR_DOT_GAP    8
 #define INDICATOR_MARGIN_BOT 4
+#define ICON_LABEL_W         64
 
 /**********************
  *  STATIC PROTOTYPES
@@ -25,6 +27,9 @@ static void page_changed_cb(lv_event_t * e);
 static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
                               const void * icon_src,
                               cellphone_screen_create_fn fn);
+static void create_camera_icon(lv_obj_t * parent, lv_color_t accent);
+static lv_color_t icon_accent_color(const char * label_text);
+static void indicator_set_active(uint32_t active_idx, bool animated);
 static void icon_wobble_all(uint32_t stagger_ms);
 static void icon_wobble_stop_all(void);
 
@@ -115,9 +120,12 @@ lv_obj_t * cellphone_home_create(lv_obj_t * parent)
         }
     }
 
-    /* Page indicator dots */
+    /* Page indicator dots. Worst-case width assumes one dot is animated to
+     * INDICATOR_ACTIVE_W while the rest stay at INDICATOR_DOT_SIZE; sizing
+     * for the steady state would clip the active pill on every swipe. */
     lv_obj_t * dot_row = cellphone_obj_bare(parent);
-    int32_t dot_total_w = (int32_t)s_page_count * INDICATOR_DOT_SIZE
+    int32_t dot_total_w = INDICATOR_ACTIVE_W
+                          + ((int32_t)s_page_count - 1) * INDICATOR_DOT_SIZE
                           + ((int32_t)s_page_count - 1) * INDICATOR_DOT_GAP;
     lv_obj_set_size(dot_row, dot_total_w,
                     INDICATOR_DOT_SIZE + INDICATOR_MARGIN_BOT);
@@ -127,13 +135,13 @@ lv_obj_t * cellphone_home_create(lv_obj_t * parent)
     lv_obj_clear_flag(dot_row, LV_OBJ_FLAG_SCROLLABLE);
 
     for(uint32_t d = 0; d < s_page_count; d++) {
-        lv_color_t dot_color = d == 0 ? CELLPHONE_COLOR_PRIMARY
-                               : CELLPHONE_COLOR_INDICATOR;
-        lv_obj_t * dot = cellphone_obj_fill(dot_row, dot_color);
+        lv_obj_t * dot = cellphone_obj_fill(dot_row, CELLPHONE_COLOR_INDICATOR);
         lv_obj_set_size(dot, INDICATOR_DOT_SIZE, INDICATOR_DOT_SIZE);
         lv_obj_set_style_radius(dot, LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_bg_opa(dot, LV_OPA_70, 0);
         s_dots[d] = dot;
     }
+    indicator_set_active(0, false);
 
     /* Listen for page changes */
     lv_obj_add_event_cb(tv, page_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -150,11 +158,11 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
                               cellphone_screen_create_fn fn)
 {
     lv_obj_t * cont = cellphone_obj_bare(parent);
-    lv_obj_set_size(cont, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_size(cont, ICON_LABEL_W + 12, CELLPHONE_ICON_SIZE + CELLPHONE_ICON_LABEL_H + 18);
     lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER,
                           LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(cont, 4, 0);
+    lv_obj_set_style_pad_row(cont, 6, 0);
     lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
@@ -162,36 +170,69 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
     if(icon_src) {
         lv_obj_t * img = lv_image_create(cont);
         lv_image_set_src(img, icon_src);
-        lv_obj_set_size(img, CELLPHONE_ICON_SIZE, CELLPHONE_ICON_SIZE);
     }
     else {
-        /* Placeholder: colored rounded square with first letter.
-         * Hash the label to pick a deterministic color so a given app
-         * always renders the same swatch. */
-        uint32_t hash = 0;
-        for(const char * p = label_text; *p; p++) hash = hash * 31 + (uint32_t) * p;
-        uint8_t hue = (uint8_t)(hash % 256);
+        lv_color_t accent = icon_accent_color(label_text);
+        lv_obj_t * icon_card = cellphone_obj_bare(cont);
+        lv_obj_set_size(icon_card, CELLPHONE_ICON_SIZE + 12, CELLPHONE_ICON_SIZE + 12);
+        lv_obj_clear_flag(icon_card, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_remove_flag(icon_card, LV_OBJ_FLAG_CLICKABLE);
 
-        lv_obj_t * placeholder = cellphone_obj_fill(cont, lv_color_hsv_to_rgb(hue, 60, 85));
-        lv_obj_set_size(placeholder, CELLPHONE_ICON_SIZE, CELLPHONE_ICON_SIZE);
-        lv_obj_set_style_radius(placeholder, 8, 0);
-        lv_obj_clear_flag(placeholder, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
-
-        char buf[2] = { label_text[0], '\0' };
-        lv_obj_center(cellphone_label(placeholder, buf,
-                                      CELLPHONE_FONT_HEADING, lv_color_white()));
+        if(lv_strcmp(label_text, "Camera") == 0) {
+            create_camera_icon(icon_card, accent);
+        }
+        else {
+            char buf[2] = { label_text[0], '\0' };
+            lv_obj_center(cellphone_label(icon_card, buf,
+                                          CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT));
+        }
     }
 
     /* Label below icon */
     lv_obj_t * lbl = cellphone_label(cont, label_text,
                                      CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT);
+    lv_obj_set_width(lbl, ICON_LABEL_W);
     lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_CLIP);
 
     /* One callback handles both click and long-press, avoiding a second
      * event descriptor per icon. */
     lv_obj_add_event_cb(cont, icon_event_cb, LV_EVENT_ALL, (void *)fn);
 
     return cont;
+}
+
+static void create_camera_icon(lv_obj_t * parent, lv_color_t accent)
+{
+    lv_obj_t * body = cellphone_obj_fill(parent, accent);
+    lv_obj_set_size(body, 30, 20);
+    lv_obj_center(body);
+    lv_obj_set_style_radius(body, 6, 0);
+    lv_obj_remove_flag(body, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t * top = cellphone_obj_fill(body, lv_color_mix(accent, lv_color_white(), LV_OPA_20));
+    lv_obj_set_size(top, 12, 5);
+    lv_obj_align(top, LV_ALIGN_TOP_LEFT, 4, -3);
+    lv_obj_set_style_radius(top, 3, 0);
+    lv_obj_remove_flag(top, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t * lens_outer = cellphone_obj_fill(body, lv_color_hex(0x263238));
+    lv_obj_set_size(lens_outer, 12, 12);
+    lv_obj_center(lens_outer);
+    lv_obj_set_style_radius(lens_outer, LV_RADIUS_CIRCLE, 0);
+    lv_obj_remove_flag(lens_outer, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t * lens_inner = cellphone_obj_fill(lens_outer, lv_color_hex(0x90caf9));
+    lv_obj_set_size(lens_inner, 6, 6);
+    lv_obj_center(lens_inner);
+    lv_obj_set_style_radius(lens_inner, LV_RADIUS_CIRCLE, 0);
+    lv_obj_remove_flag(lens_inner, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t * flash = cellphone_obj_fill(body, lv_color_hex(0xfff59d));
+    lv_obj_set_size(flash, 4, 4);
+    lv_obj_align(flash, LV_ALIGN_RIGHT_MID, -4, 0);
+    lv_obj_set_style_radius(flash, LV_RADIUS_CIRCLE, 0);
+    lv_obj_remove_flag(flash, LV_OBJ_FLAG_CLICKABLE);
 }
 
 static void icon_event_cb(lv_event_t * e)
@@ -274,6 +315,39 @@ static void icon_wobble_stop_all(void)
     }
 }
 
+static lv_color_t icon_accent_color(const char * label_text)
+{
+    uint32_t hash = 0;
+    for(const char * p = label_text; *p; p++) hash = hash * 31U + (uint32_t) * p;
+    return lv_color_hsv_to_rgb((uint8_t)(hash % 256U), 42, 88);
+}
+
+static void indicator_set_active(uint32_t active_idx, bool animated)
+{
+    for(uint32_t d = 0; d < s_page_count; d++) {
+        lv_obj_t * dot = s_dots[d];
+        if(!dot) continue;
+
+        bool active = d == active_idx;
+        int32_t target_w = active ? INDICATOR_ACTIVE_W : INDICATOR_DOT_SIZE;
+        lv_color_t color = active ? CELLPHONE_COLOR_PRIMARY : CELLPHONE_COLOR_INDICATOR;
+        lv_opa_t opa = active ? LV_OPA_COVER : LV_OPA_70;
+
+        lv_obj_set_style_bg_color(dot, color, 0);
+        lv_obj_set_style_bg_opa(dot, opa, 0);
+
+        if(animated) {
+            cellphone_anim_run(dot, cellphone_anim_set_width_cb,
+                               lv_obj_get_width(dot), target_w,
+                               CELLPHONE_MOTION_QUICK.enter_ms,
+                               CELLPHONE_MOTION_QUICK.path_cb);
+        }
+        else {
+            lv_obj_set_width(dot, target_w);
+        }
+    }
+}
+
 static void page_changed_cb(lv_event_t * e)
 {
     lv_obj_t * tv = lv_event_get_target(e);
@@ -283,14 +357,7 @@ static void page_changed_cb(lv_event_t * e)
     int32_t tv_w = lv_obj_get_width(tv);
     if(tv_w <= 0) return;
     int32_t col = lv_obj_get_x(tile) / tv_w;
-
-    for(uint32_t d = 0; d < s_page_count; d++) {
-        lv_obj_set_style_bg_color(s_dots[d],
-                                  (int32_t)d == col
-                                  ? CELLPHONE_COLOR_PRIMARY
-                                  : CELLPHONE_COLOR_INDICATOR,
-                                  0);
-    }
+    indicator_set_active((uint32_t)col, true);
 }
 
 #endif /* LV_USE_DEMO_CELLPHONE */

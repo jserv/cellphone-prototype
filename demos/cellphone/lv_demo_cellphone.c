@@ -534,6 +534,33 @@ lv_obj_t * cellphone_obj_bar(lv_obj_t * parent, lv_color_t top, lv_color_t bot)
     return obj;
 }
 
+lv_obj_t * cellphone_section_header(lv_obj_t * parent, const char * title,
+                                    lv_align_t title_align,
+                                    const char * trailing_text)
+{
+    lv_obj_t * header = cellphone_obj_bar(parent, CELLPHONE_COLOR_NAVBAR_GRAD,
+                                          CELLPHONE_COLOR_NAVBAR);
+    lv_obj_set_size(header, CELLPHONE_CONTENT_W, CELLPHONE_SECTION_HDR_H);
+    lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
+
+    /* Inset the title only when it sits against an edge so centered titles
+     * don't pick up a stray 8 px offset. */
+    int32_t x_ofs = (title_align == LV_ALIGN_LEFT_MID)  ?  8
+                    : (title_align == LV_ALIGN_RIGHT_MID) ? -8
+                    : 0;
+    lv_obj_t * title_lbl = cellphone_label(header, title,
+                                           CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT);
+    lv_obj_align(title_lbl, title_align, x_ofs, 0);
+
+    if(trailing_text && trailing_text[0] != '\0') {
+        lv_obj_t * trailing = cellphone_label(header, trailing_text,
+                                              CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT);
+        lv_obj_align(trailing, LV_ALIGN_RIGHT_MID, -8, 0);
+    }
+
+    return header;
+}
+
 lv_obj_t * cellphone_label(lv_obj_t * parent, const char * text,
                            const lv_font_t * font, lv_color_t color)
 {
@@ -605,10 +632,10 @@ void cellphone_screen_push(cellphone_screen_create_fn fn)
         lv_obj_set_x(scr, width);
         cellphone_anim_run(prev_scr, cellphone_anim_set_x_cb,
                            0, -width, CELLPHONE_MOTION_STANDARD.enter_ms,
-                           lv_anim_path_linear);
+                           CELLPHONE_MOTION_STANDARD.path_cb);
         cellphone_anim_run(scr, cellphone_anim_set_x_cb,
                            width, 0, CELLPHONE_MOTION_STANDARD.enter_ms,
-                           lv_anim_path_linear);
+                           CELLPHONE_MOTION_STANDARD.path_cb);
     }
     else {
         lv_obj_set_x(scr, 0);
@@ -641,10 +668,10 @@ void cellphone_screen_pop(void)
         lv_obj_set_x(prev_scr, -width);
         cellphone_anim_run(prev_scr, cellphone_anim_set_x_cb,
                            -width, 0, CELLPHONE_MOTION_STANDARD.exit_ms,
-                           lv_anim_path_linear);
+                           CELLPHONE_MOTION_STANDARD.path_cb);
         cellphone_anim_run(old_scr, cellphone_anim_set_x_cb,
                            0, width, CELLPHONE_MOTION_STANDARD.exit_ms,
-                           lv_anim_path_linear);
+                           CELLPHONE_MOTION_STANDARD.path_cb);
 
         /* Let the slide-out finish, then destroy the old screen synchronously so
          * its delete callbacks run before the user can reopen the same app. */

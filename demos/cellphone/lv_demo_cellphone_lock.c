@@ -41,10 +41,7 @@ lv_obj_t * cellphone_lock_create(lv_obj_t * parent)
     /* Dark gradient background -- hardcoded so the lock screen remains a
      * high-contrast backdrop for the white clock/date text regardless of
      * the active theme palette. */
-    lv_obj_set_style_bg_opa(parent, LV_OPA_COVER, 0);
-    lv_obj_set_style_bg_color(parent, lv_color_hex(0x1a1a2e), 0);
-    lv_obj_set_style_bg_grad_color(parent, lv_color_black(), 0);
-    lv_obj_set_style_bg_grad_dir(parent, LV_GRAD_DIR_VER, 0);
+    cellphone_obj_paint_grad(parent, lv_color_hex(0x1a1a2e), lv_color_black());
 
     /* Clock label -- real system time */
     char time_buf[8];
@@ -156,21 +153,23 @@ static void slider_event_cb(lv_event_t * e)
             lv_obj_set_size(bot_panel, CELLPHONE_HOR_RES, parent_h - split_y);
             lv_obj_clear_flag(bot_panel, LV_OBJ_FLAG_SCROLLABLE);
 
-            /* Animate top panel upward (200ms) */
+            /* Animate top panel upward using the shared QUICK preset. */
             cellphone_anim_run(top_panel, cellphone_anim_set_y_cb,
-                               0, -split_y, 200, lv_anim_path_ease_in);
+                               0, -split_y, CELLPHONE_MOTION_QUICK.exit_ms,
+                               CELLPHONE_MOTION_QUICK.path_cb);
 
-            /* Animate bottom panel downward (200ms + 100ms sequenced).
-             * Built inline here because it carries a delay + completed_cb,
-             * which the shared cellphone_anim_run doesn't expose. */
+            /* Animate bottom panel downward with an 80 ms delay so it
+             * trails the top panel. Built inline rather than via
+             * cellphone_anim_run because it carries delay + completed_cb,
+             * which the shared helper doesn't expose. */
             lv_anim_t a;
             lv_anim_init(&a);
             lv_anim_set_var(&a, bot_panel);
             lv_anim_set_exec_cb(&a, cellphone_anim_set_y_cb);
             lv_anim_set_values(&a, split_y, parent_h);
-            lv_anim_set_duration(&a, 200);
-            lv_anim_set_delay(&a, 100);
-            lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
+            lv_anim_set_duration(&a, CELLPHONE_MOTION_QUICK.exit_ms);
+            lv_anim_set_delay(&a, 80);
+            lv_anim_set_path_cb(&a, CELLPHONE_MOTION_QUICK.path_cb);
             lv_anim_set_completed_cb(&a, shutter_done_cb);
             lv_anim_start(&a);
 
@@ -183,7 +182,8 @@ static void slider_event_cb(lv_event_t * e)
         if(val < 90) {
             /* Animate back to 0 */
             cellphone_anim_run(slider, slider_reset_anim_cb,
-                               val, 0, 200, lv_anim_path_ease_out);
+                               val, 0, CELLPHONE_MOTION_QUICK.enter_ms,
+                               CELLPHONE_MOTION_QUICK.path_cb);
         }
     }
 }

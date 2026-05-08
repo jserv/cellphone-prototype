@@ -55,6 +55,8 @@ void cellphone_anim_highlight_sweep(lv_obj_t * highlight, int32_t width);
  * every caller already relies on. */
 void cellphone_anim_set_x_cb(void * var, int32_t v);
 void cellphone_anim_set_y_cb(void * var, int32_t v);
+void cellphone_anim_set_width_cb(void * var, int32_t v);
+void cellphone_anim_set_height_cb(void * var, int32_t v);
 void cellphone_anim_set_opa_cb(void * var, int32_t v);
 void cellphone_anim_set_bg_opa_cb(void * var, int32_t v);
 void cellphone_anim_set_scale_cb(void * var, int32_t v);
