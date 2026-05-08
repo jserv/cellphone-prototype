@@ -1,0 +1,9 @@
+src/font/font_vec/lv_font_vec.c
+  ai_agent 1143-1211,1222-1227,1229-1233,1596-1619,1725-1727
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e0b0be513441810f971b73168f8dafeff0801a2d",
+  "prompts": {}
+}
