@@ -1,0 +1,56 @@
+demos/cellphone/mem_report.h
+  2e1970d774fdf197 1-47
+demos/cellphone/build.sh
+  2e1970d774fdf197 11
+demos/cellphone/README.md
+  2e1970d774fdf197 280-297
+demos/cellphone/main_test.c
+  bd908cef685771a8 62,86-87,296,300,303,330-331,341,343-344,357,359-360,376-377,1120,165,230-231,242,244,258,268,276,280-282,284-286,293-294,297-298,302,315,317,323,325-326,335,337-338,340,342,371-373,375,462,464,466,468,471,483,491,541,543,550,559,564,577,624,638,645,652,657-658,913,936
+  2e1970d774fdf197 7-9,12,29,222,225,227-229,232-233,237-238,240-241,243,245,248-254,256-257,259-267,272-274,277-279,283,289-290,295,299,304-313,318-322,327,332-333,336,339,345-350,352-356,358,361-369,374,455-461,463,465,467,469-470,472-482,484-490,492-496,530-540,542,545-549,552-558,560-562,565-575,578-580,582,607-615,620-623,625-637,639-644,646-651,653-656,659-664,667,753,796-797,800-801,808-821,840-842,845,893-898,914-935,980-982,984,1030-1040,1053,1058-1061
+  afd29ed2b2fef4bd 269,292,301,314,316,329,563,576,581,583
+demos/cellphone/mem_report.c
+  2e1970d774fdf197 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "de6892188d26f6924c726ee5e53f59283c76a193",
+  "prompts": {
+    "2e1970d774fdf197": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61552eae-90fb-4c6e-9b7e-443c43a4e8af",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 812,
+      "total_deletions": 556,
+      "accepted_lines": 352,
+      "overriden_lines": 0
+    },
+    "afd29ed2b2fef4bd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df1e5-5695-7503-b487-f3fd5e53aa70",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 20,
+      "total_deletions": 4,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    },
+    "bd908cef685771a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2fcc2314-08ee-4036-9c12-2e5877de2ff1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang",
+      "total_additions": 56802,
+      "total_deletions": 293,
+      "accepted_lines": 54,
+      "overriden_lines": 0
+    }
+  }
+}
