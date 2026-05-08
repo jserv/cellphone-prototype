@@ -1,0 +1,19 @@
+demos/cellphone/config/lv_conf.h
+  s_d417a7a1fcb2f4::t_aa2d433a90dbb6 23-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "db97c507bfb19e90ae623c78f8f64ac0ce0fe4e8",
+  "prompts": {},
+  "sessions": {
+    "s_d417a7a1fcb2f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e0397-468a-7230-8fad-7ff1ef53f444",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
