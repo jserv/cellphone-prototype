@@ -19,7 +19,7 @@
 /*********************
  *      DEFINES
  *********************/
-#define SOFTKBD_ANIM_MS 220
+#define SOFTKBD_ANIM_MS 180
 
 /*********************
  *  STATIC VARIABLES
@@ -63,8 +63,10 @@ static void softkbd_hide_finish_cb(lv_anim_t * a);
  *   LV_SYMBOL_CLOSE / LV_SYMBOL_KEYBOARD — fire LV_EVENT_CANCEL (hide)
  *
  * For the send key we use LV_SYMBOL_RIGHT (right arrow → renders, reads
- * as "send") and route it manually through LV_EVENT_READY in
- * softkbd_kb_value_changed_cb, which replaces the default handler.
+ * as "send") and route it directly to the textarea in
+ * softkbd_kb_value_changed_cb.  Unlike stock READY handling, send does
+ * not dismiss the keyboard; that matches modern chat composers where
+ * consecutive messages are common.
  */
 
 /* Mode-switch buttons need the CHECKED bit so lv_keyboard's update_ctrl_map
@@ -219,10 +221,10 @@ static lv_obj_t * softkbd_build(lv_obj_t * parent)
     softkbd_apply_style(kb);
 
     /* Replace lv_keyboard's default value-changed handler with our wrapper
-     * — this is how we translate the right-arrow "send" key into
-     * LV_EVENT_READY.  The wrapper falls through to lv_keyboard_def_event_cb
-     * for everything else so mode switches, backspace, and CLOSE keep
-     * working. */
+     * — this is how we translate the right-arrow "send" key into a
+     * textarea-only READY event.  The wrapper falls through to
+     * lv_keyboard_def_event_cb for everything else so mode switches,
+     * backspace, and CLOSE keep working. */
     lv_obj_remove_event_cb(kb, lv_keyboard_def_event_cb);
     lv_obj_add_event_cb(kb, softkbd_kb_value_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_add_event_cb(kb, softkbd_kb_event_cb,         LV_EVENT_READY,         NULL);
@@ -246,8 +248,11 @@ static void softkbd_apply_style(lv_obj_t * kb)
      * extra two pixels over font_sm matter for legibility.  Tight padding so
      * the keys themselves get every available pixel. */
     lv_obj_set_style_text_font(kb, CELLPHONE_FONT_NORMAL, 0);
-    lv_obj_set_style_pad_all(kb, 2, 0);
-    lv_obj_set_style_pad_gap(kb, 2, 0);
+    lv_obj_set_style_pad_top(kb, 4, 0);
+    lv_obj_set_style_pad_bottom(kb, 4, 0);
+    lv_obj_set_style_pad_left(kb, 3, 0);
+    lv_obj_set_style_pad_right(kb, 3, 0);
+    lv_obj_set_style_pad_gap(kb, 3, 0);
     lv_obj_set_style_radius(kb, 0, 0);
     lv_obj_set_style_border_width(kb, 0, 0);
     cellphone_obj_paint_fill(kb, CELLPHONE_COLOR_NAVBAR);
@@ -262,14 +267,17 @@ static void softkbd_apply_style(lv_obj_t * kb)
     lv_obj_set_style_text_color(kb, CELLPHONE_COLOR_TEXT, LV_PART_ITEMS);
     lv_obj_set_style_bg_color(kb, CELLPHONE_COLOR_CARD, LV_PART_ITEMS);
     lv_obj_set_style_bg_opa(kb, LV_OPA_COVER, LV_PART_ITEMS);
-    lv_obj_set_style_radius(kb, 4, LV_PART_ITEMS);
+    lv_obj_set_style_radius(kb, 6, LV_PART_ITEMS);
     lv_obj_set_style_border_width(kb, 0, LV_PART_ITEMS);
     lv_obj_set_style_shadow_width(kb, 0, LV_PART_ITEMS);
+    lv_obj_set_style_pad_top(kb, 6, LV_PART_ITEMS);
+    lv_obj_set_style_pad_bottom(kb, 6, LV_PART_ITEMS);
 
     /* Pressed feedback: stronger than just a fill-color swap so users see
      * the touch register even when their thumb covers the key. */
     lv_obj_set_style_bg_color(kb, CELLPHONE_COLOR_PRIMARY, LV_PART_ITEMS | LV_STATE_PRESSED);
     lv_obj_set_style_text_color(kb, lv_color_white(), LV_PART_ITEMS | LV_STATE_PRESSED);
+    lv_obj_set_style_translate_y(kb, 1, LV_PART_ITEMS | LV_STATE_PRESSED);
 
     /* Mode-switch keys (CHECKED state) get the dark primary so the active
      * mode is visually distinct from the (transient) pressed state. */
@@ -308,13 +316,9 @@ static void softkbd_kb_value_changed_cb(lv_event_t * e)
     uint32_t btn = lv_keyboard_get_selected_button(kb);
     const char * txt = lv_keyboard_get_button_text(kb, btn);
 
-    /* Custom send key: LV_SYMBOL_RIGHT acts like LV_SYMBOL_OK does in the
-     * stock handler — fire LV_EVENT_READY on the keyboard then on the
-     * textarea, and skip the text-insertion fall-through so the arrow
-     * char never lands in the textarea. */
+    /* Custom send key: LV_SYMBOL_RIGHT sends through the textarea only and
+     * keeps the keyboard open so the user can continue typing. */
     if(txt && lv_strcmp(txt, LV_SYMBOL_RIGHT) == 0) {
-        lv_result_t r = lv_obj_send_event(kb, LV_EVENT_READY, NULL);
-        if(r != LV_RESULT_OK) return;
         lv_obj_t * ta = lv_keyboard_get_textarea(kb);
         if(ta) lv_obj_send_event(ta, LV_EVENT_READY, NULL);
         return;
@@ -327,11 +331,9 @@ static void softkbd_kb_value_changed_cb(lv_event_t * e)
 
 static void softkbd_kb_event_cb(lv_event_t * e)
 {
-    /* OK / send / hide all dismiss the keyboard.  The textarea has already
-     * received its own LV_EVENT_READY or LV_EVENT_CANCEL by the time we
-     * get here, so callers can treat that as the "send" signal. */
+    /* Only explicit hide actions dismiss the keyboard. */
     lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+    if(code == LV_EVENT_CANCEL) {
         cellphone_softkbd_hide();
     }
 }

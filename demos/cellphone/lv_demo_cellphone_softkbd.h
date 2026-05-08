@@ -18,15 +18,14 @@ extern "C" {
 
 #if LV_USE_DEMO_CELLPHONE
 
-/** Height of the soft keyboard in pixels.  QVGA rows are ~45 px tall —
- *  the smallest comfortable touch target on a 240-wide layout where
- *  each key is only 22-27 px wide.  LARGE (480x320) only has a 252 px
- *  content area between status bar and nav bar, so the keyboard stays
- *  shorter there or it leaves no room for chat history above it. */
+/** Height of the soft keyboard in pixels.  The compact layout keeps four
+ *  full rows but trims the chrome around them so chat history keeps more
+ *  vertical room.  QVGA still lands around a ~35 px touch band per row,
+ *  which is the smallest size that remained reliable in-thumb. */
 #if LV_DEMO_CELLPHONE_LARGE
-#define CELLPHONE_SOFTKBD_H 150
+#define CELLPHONE_SOFTKBD_H 132
 #else
-#define CELLPHONE_SOFTKBD_H 180
+#define CELLPHONE_SOFTKBD_H 144
 #endif
 
 /**

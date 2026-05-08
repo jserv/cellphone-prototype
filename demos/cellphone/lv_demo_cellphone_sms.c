@@ -16,7 +16,7 @@
 #define SMS_BUBBLE_RADIUS   12
 #define SMS_BUBBLE_PAD      8
 #define SMS_BUBBLE_MAX_PCT  70
-#define SMS_INPUT_H         30
+#define SMS_INPUT_H         34
 
 /*********************
  *  STATIC VARIABLES
@@ -33,6 +33,7 @@ static lv_obj_t * s_chat_parent;     /* the screen content area, host for the ke
 static lv_obj_t * s_chat_container;
 static lv_obj_t * s_chat_input;
 static lv_obj_t * s_chat_input_row;
+static lv_obj_t * s_chat_send_btn;
 
 /*********************
  *  STATIC PROTOTYPES
@@ -42,11 +43,13 @@ static void thread_click_cb(lv_event_t * e);
 static void send_btn_cb(lv_event_t * e);
 static void chat_delete_cb(lv_event_t * e);
 static void chat_input_event_cb(lv_event_t * e);
+static void chat_background_event_cb(lv_event_t * e);
 static void chat_kb_hidden_cb(void);
 static void append_bubble(lv_obj_t * cont, const char * text,
                           const char * time, bool is_sent);
 static void chat_apply_kb_layout(bool kb_visible);
 static void chat_send_message(void);
+static void chat_refresh_compose_state(void);
 
 /*********************
  *   GLOBAL FUNCTIONS
@@ -169,6 +172,8 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
     lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_add_event_cb(cont, chat_background_event_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(header, chat_background_event_cb, LV_EVENT_CLICKED, NULL);
 
     /* create message bubbles */
     uint32_t i;
@@ -192,9 +197,14 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
     lv_obj_set_pos(input_row, 0, CELLPHONE_CONTENT_H - SMS_INPUT_H);
     lv_obj_set_flex_flow(input_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_column(input_row, 2, 0);
+    cellphone_obj_paint_fill(input_row, CELLPHONE_COLOR_NAVBAR);
+    lv_obj_set_style_pad_all(input_row, 2, 0);
+    lv_obj_set_style_border_color(input_row, CELLPHONE_COLOR_INDICATOR, 0);
+    lv_obj_set_style_border_width(input_row, 1, 0);
+    lv_obj_set_style_border_side(input_row, LV_BORDER_SIDE_TOP, 0);
 
     lv_obj_t * input = lv_textarea_create(input_row);
-    lv_obj_set_height(input, SMS_INPUT_H);
+    lv_obj_set_height(input, SMS_INPUT_H - 4);
     lv_obj_set_flex_grow(input, 1);
     lv_textarea_set_placeholder_text(input, "Type a message...");
     lv_textarea_set_one_line(input, true);
@@ -204,6 +214,12 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
     lv_obj_set_style_bg_color(input, CELLPHONE_COLOR_CARD, 0);
     lv_obj_set_style_border_color(input, CELLPHONE_COLOR_INDICATOR, 0);
     lv_obj_set_style_border_width(input, 1, 0);
+    lv_obj_set_style_radius(input, 10, 0);
+    lv_obj_set_style_pad_left(input, 10, 0);
+    lv_obj_set_style_pad_right(input, 10, 0);
+    lv_obj_set_style_pad_top(input, 7, 0);
+    lv_obj_set_style_pad_bottom(input, 7, 0);
+    lv_obj_set_style_border_color(input, CELLPHONE_COLOR_PRIMARY, LV_STATE_FOCUSED);
 
     /* One callback is enough for the textarea lifecycle: raise the keyboard
      * on focus/tap and treat READY as send. This avoids stacking multiple
@@ -215,14 +231,19 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
     cellphone_softkbd_set_hidden_cb(chat_kb_hidden_cb);
 
     lv_obj_t * send_btn = lv_button_create(input_row);
-    lv_obj_set_size(send_btn, 40, SMS_INPUT_H);
+    lv_obj_set_size(send_btn, 44, SMS_INPUT_H - 4);
     lv_obj_set_style_bg_color(send_btn, CELLPHONE_COLOR_PRIMARY, 0);
-    lv_obj_set_style_radius(send_btn, 4, 0);
+    lv_obj_set_style_bg_color(send_btn, CELLPHONE_COLOR_PRIMARY_DK, LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(send_btn, LV_OPA_40, LV_STATE_DISABLED);
+    lv_obj_set_style_text_opa(send_btn, LV_OPA_50, LV_STATE_DISABLED);
+    lv_obj_set_style_radius(send_btn, 10, 0);
     s_chat_input = input;
+    s_chat_send_btn = send_btn;
     lv_obj_add_event_cb(send_btn, send_btn_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_center(cellphone_label(send_btn, LV_SYMBOL_RIGHT,
                                   CELLPHONE_FONT_NORMAL, lv_color_white()));
+    chat_refresh_compose_state();
 
     return parent;
 }
@@ -233,7 +254,7 @@ static lv_obj_t * chat_detail_create(lv_obj_t * parent)
  */
 static void send_btn_cb(lv_event_t * e)
 {
-    LV_UNUSED(e);
+    if(lv_obj_has_state(lv_event_get_target_obj(e), LV_STATE_DISABLED)) return;
     chat_send_message();
 }
 
@@ -247,6 +268,7 @@ static void chat_send_message(void)
     append_bubble(s_chat_container, text, "now", true);
     lv_textarea_set_text(s_chat_input, "");
     lv_obj_scroll_to_y(s_chat_container, LV_COORD_MAX, LV_ANIM_ON);
+    chat_refresh_compose_state();
 }
 
 /**
@@ -265,11 +287,24 @@ static void chat_input_event_cb(lv_event_t * e)
         return;
     }
 
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        chat_refresh_compose_state();
+        return;
+    }
+
     if(code == LV_EVENT_READY) {
         chat_send_message();
+        chat_refresh_compose_state();
     }
     /* No chat_apply_kb_layout(false) here — chat_kb_hidden_cb handles it
      * after the keyboard's slide-out completes. */
+}
+
+static void chat_background_event_cb(lv_event_t * e)
+{
+    LV_UNUSED(e);
+    if(!cellphone_softkbd_is_visible()) return;
+    cellphone_softkbd_hide();
 }
 
 static void chat_kb_hidden_cb(void)
@@ -297,6 +332,25 @@ static void chat_apply_kb_layout(bool kb_visible)
     lv_obj_scroll_to_y(s_chat_container, LV_COORD_MAX, LV_ANIM_OFF);
 }
 
+static void chat_refresh_compose_state(void)
+{
+    if(!s_chat_input || !s_chat_send_btn) return;
+
+    const char * text = lv_textarea_get_text(s_chat_input);
+    bool has_text = text != NULL && text[0] != '\0';
+
+    /* Toggle CLICKABLE in lockstep with DISABLED so the pressed-state
+     * fill never paints on a button that won't act on the press. */
+    if(has_text) {
+        lv_obj_remove_state(s_chat_send_btn, LV_STATE_DISABLED);
+        lv_obj_add_flag(s_chat_send_btn, LV_OBJ_FLAG_CLICKABLE);
+    }
+    else {
+        lv_obj_add_state(s_chat_send_btn, LV_STATE_DISABLED);
+        lv_obj_remove_flag(s_chat_send_btn, LV_OBJ_FLAG_CLICKABLE);
+    }
+}
+
 static void append_bubble(lv_obj_t * cont, const char * text,
                           const char * time, bool is_sent)
 {
@@ -305,6 +359,9 @@ static void append_bubble(lv_obj_t * cont, const char * text,
     /* wrapper row to control alignment */
     lv_obj_t * row = cellphone_obj_bare(cont);
     lv_obj_set_size(row, CELLPHONE_CONTENT_W - 8, LV_SIZE_CONTENT);
+    /* Bubbles are display-only; clearing CLICKABLE lets background taps
+     * reach chat_background_event_cb on the cont so the kb dismisses. */
+    lv_obj_remove_flag(row, LV_OBJ_FLAG_CLICKABLE);
 
     /* bubble */
     lv_obj_t * bubble = cellphone_obj_fill(row,
@@ -317,6 +374,7 @@ static void append_bubble(lv_obj_t * cont, const char * text,
     lv_obj_set_style_pad_all(bubble, SMS_BUBBLE_PAD, 0);
     lv_obj_set_scrollbar_mode(bubble, LV_SCROLLBAR_MODE_OFF);
     lv_obj_align(bubble, is_sent ? LV_ALIGN_TOP_RIGHT : LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_remove_flag(bubble, LV_OBJ_FLAG_CLICKABLE);
 
     lv_obj_t * text_label = cellphone_label(bubble, text,
                                             CELLPHONE_FONT_NORMAL, CELLPHONE_COLOR_TEXT);
@@ -341,6 +399,7 @@ static void chat_delete_cb(lv_event_t * e)
     s_chat_container = NULL;
     s_chat_input = NULL;
     s_chat_input_row = NULL;
+    s_chat_send_btn = NULL;
     s_chat_parent = NULL;
 }
 
