@@ -14,6 +14,9 @@ extern "C" {
 #if LV_USE_DEMO_CELLPHONE
 
 lv_obj_t * cellphone_contacts_create(lv_obj_t * parent);
+bool cellphone_contacts_test_open_add_overlay(void);
+lv_obj_t * cellphone_contacts_test_get_add_field(uint32_t idx);
+bool cellphone_contacts_test_advance_add_focus(uint32_t from_idx);
 
 #endif
 #ifdef __cplusplus

@@ -27,9 +27,11 @@
 #include "lv_demo_cellphone_calc.h"
 #include "lv_demo_cellphone_music.h"
 #include "lv_demo_cellphone_photo.h"
+#include "lv_demo_cellphone_data.h"
 #include "lv_demo_cellphone_settings.h"
 #include "lv_demo_cellphone_calllog.h"
 #include "lv_demo_cellphone_camera.h"
+#include "lv_demo_cellphone_game.h"
 
 /*********************
  *      DEFINES
@@ -40,6 +42,14 @@
 /**********************
  *      TYPEDEFS
  **********************/
+typedef struct {
+    uint32_t screen_state;
+    lv_coord_t scroll_x;
+    lv_coord_t scroll_y;
+    uint8_t game_state[CELLPHONE_GAME_REFRESH_STATE_SIZE];
+    bool has_scroll;
+    bool has_game_state;
+} screen_refresh_state_t;
 
 /**********************
  *  THEME + MOTION DATA
@@ -266,7 +276,13 @@ const cellphone_motion_preset_t CELLPHONE_MOTION_QUICK      = { 150, 100, lv_ani
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void create_demo(lv_obj_t * parent);
+static void create_demo(lv_obj_t * parent,
+                        const cellphone_screen_create_fn * initial_stack,
+                        const screen_refresh_state_t * initial_states,
+                        uint32_t initial_depth);
+static void create_stack_sequence(const cellphone_screen_create_fn * fns,
+                                  const screen_refresh_state_t * states,
+                                  uint32_t depth);
 static void create_hosts(lv_obj_t * host_parent);
 static void apply_pressed_feedback_recursive(lv_obj_t * obj);
 static void screen_delete_timer_cb(lv_timer_t * timer);
@@ -275,6 +291,13 @@ static void screen_delete_timer_cb(lv_timer_t * timer);
     static void prepare_skin_parent(lv_obj_t * parent);
 #endif
 static void idle_timer_cb(lv_timer_t * timer);
+static screen_refresh_state_t screen_refresh_state_capture(cellphone_screen_create_fn fn,
+                                                           lv_obj_t * screen);
+static void screen_refresh_state_restore(cellphone_screen_create_fn fn,
+                                         lv_obj_t * screen,
+                                         const screen_refresh_state_t * state);
+static bool screen_create_fn_is_game(cellphone_screen_create_fn fn);
+static lv_obj_t * screen_find_scrollable(lv_obj_t * root);
 
 /**********************
  *  STATIC VARIABLES
@@ -294,6 +317,8 @@ static lv_timer_t * s_idle_timer;
 static lv_demo_args_t s_demo_args;
 static bool s_demo_args_valid;
 static bool s_screen_transitions_enabled = true;
+static uint32_t s_screen_event_shown;
+static uint32_t s_screen_event_hidden;
 
 /** Global pressed-feedback style: darken interactive widgets on touch. */
 static lv_style_t s_pressed_style;
@@ -320,6 +345,9 @@ static const cellphone_app_entry_t s_apps[] = {
     { "Camera",     NULL,               cellphone_camera_create },
     { "Settings",   &img_icon_settings, cellphone_settings_create },
     { "Call Log",   &img_icon_clock,    cellphone_calllog_create },
+    { "Snake",      NULL,               cellphone_snake_create },
+    { "Pong",       NULL,               cellphone_pong_create },
+    { "Tetris",     NULL,               cellphone_tetris_create },
 };
 
 #define APP_COUNT (sizeof(s_apps) / sizeof(s_apps[0]))
@@ -402,6 +430,18 @@ void cellphone_theme_set(uint32_t idx)
     s_active_theme_idx = idx;
 }
 
+uint32_t cellphone_screen_event_shown(void)
+{
+    if(s_screen_event_shown == 0) s_screen_event_shown = lv_event_register_id();
+    return s_screen_event_shown;
+}
+
+uint32_t cellphone_screen_event_hidden(void)
+{
+    if(s_screen_event_hidden == 0) s_screen_event_hidden = lv_event_register_id();
+    return s_screen_event_hidden;
+}
+
 /*---------------------------------------------------------------------------
  * Public API
  *---------------------------------------------------------------------------*/
@@ -447,11 +487,17 @@ void lv_demo_cellphone(void)
 
 void lv_demo_cellphone_with_args(const lv_demo_args_t * args)
 {
+    static const cellphone_screen_create_fn boot_stack[] = {
+        cellphone_home_create,
+        cellphone_lock_create
+    };
+
     LV_ASSERT_NULL(args);
 
     /* Refresh in case `with_args` was invoked directly (embedded entry) or in
      * case the active theme changed since the last call (rebuild path). */
     demo_default_theme_sync();
+    cellphone_data_reset_mutable();
 
     s_demo_args = *args;
     s_demo_args_valid = true;
@@ -472,7 +518,8 @@ void lv_demo_cellphone_with_args(const lv_demo_args_t * args)
     s_root = NULL;
     s_stack_host = NULL;
     s_overlay_host = NULL;
-    create_demo(args->parent ? args->parent : lv_screen_active());
+    create_demo(args->parent ? args->parent : lv_screen_active(),
+                boot_stack, NULL, 2);
 }
 
 void lv_demo_cellphone_rebuild(void)
@@ -487,6 +534,60 @@ void lv_demo_cellphone_rebuild(void)
     }
 
     lv_demo_cellphone_with_args(&args);
+}
+
+void lv_demo_cellphone_refresh_theme(void)
+{
+    lv_demo_args_t args;
+    cellphone_screen_create_fn stack_fns[CELLPHONE_SCREEN_STACK_DEPTH];
+    screen_refresh_state_t stack_states[CELLPHONE_SCREEN_STACK_DEPTH];
+    uint32_t depth = 0;
+    static const cellphone_screen_create_fn boot_stack[] = {
+        cellphone_home_create,
+        cellphone_lock_create
+    };
+
+    if(s_demo_args_valid) {
+        args = s_demo_args;
+    }
+    else {
+        lv_demo_args_init(&args);
+    }
+
+    if(s_stack_top >= 0) {
+        depth = (uint32_t)(s_stack_top + 1);
+        if(depth > CELLPHONE_SCREEN_STACK_DEPTH) depth = CELLPHONE_SCREEN_STACK_DEPTH;
+        for(uint32_t i = 0; i < depth; i++) {
+            stack_fns[i] = s_stack[i].create_fn;
+            stack_states[i] = screen_refresh_state_capture(s_stack[i].create_fn,
+                                                           s_stack[i].screen);
+        }
+    }
+
+    demo_default_theme_sync();
+
+    if(s_root && lv_obj_is_valid(s_root)) {
+#if defined(LV_DEMO_CELLPHONE_SKIN) && LV_DEMO_CELLPHONE_SKIN && LV_USE_SDL
+        cellphone_skin_reset();
+#endif
+        lv_obj_delete(s_root);
+    }
+
+    if(s_idle_timer) {
+        lv_timer_delete(s_idle_timer);
+        s_idle_timer = NULL;
+    }
+
+    s_stack_top = -1;
+    s_root = NULL;
+    s_stack_host = NULL;
+    s_overlay_host = NULL;
+    s_demo_args = args;
+    s_demo_args_valid = true;
+    create_demo(args.parent ? args.parent : lv_screen_active(),
+                depth ? stack_fns : boot_stack,
+                depth ? stack_states : NULL,
+                depth ? depth : 2);
 }
 
 const cellphone_app_entry_t * cellphone_app_registry(uint32_t * count)
@@ -620,6 +721,11 @@ void cellphone_screen_push(cellphone_screen_create_fn fn)
     s_stack[s_stack_top].create_fn = fn;
     s_stack[s_stack_top].screen    = scr;
 
+    lv_obj_send_event(scr, (lv_event_code_t)cellphone_screen_event_shown(), NULL);
+    if(prev_scr) {
+        lv_obj_send_event(prev_scr, (lv_event_code_t)cellphone_screen_event_hidden(), NULL);
+    }
+
     if(s_overlay_host && !lv_obj_has_flag(s_overlay_host, LV_OBJ_FLAG_HIDDEN)) {
         lv_obj_move_foreground(s_overlay_host);
     }
@@ -657,6 +763,9 @@ void cellphone_screen_pop(void)
      * old screen through singleton state while it slides out. */
     s_stack[s_stack_top].screen = NULL;
     s_stack_top--;
+
+    lv_obj_send_event(old_scr, (lv_event_code_t)cellphone_screen_event_hidden(), NULL);
+    lv_obj_send_event(prev_scr, (lv_event_code_t)cellphone_screen_event_shown(), NULL);
 
     if(s_overlay_host && !lv_obj_has_flag(s_overlay_host, LV_OBJ_FLAG_HIDDEN)) {
         lv_obj_move_foreground(s_overlay_host);
@@ -698,6 +807,7 @@ void cellphone_screen_home(void)
     /* Delete everything above the home screen */
     for(int i = s_stack_top; i > 0; i--) {
         lv_obj_t * scr = s_stack[i].screen;
+        lv_obj_send_event(scr, (lv_event_code_t)cellphone_screen_event_hidden(), NULL);
         if(s_screen_transitions_enabled) {
             lv_obj_fade_out(scr, CELLPHONE_MOTION_QUICK.exit_ms, 0);
             lv_timer_t * delete_timer = lv_timer_create(screen_delete_timer_cb,
@@ -712,6 +822,7 @@ void cellphone_screen_home(void)
         s_stack[i].screen = NULL;
     }
     s_stack_top = 0;
+    lv_obj_send_event(s_stack[0].screen, (lv_event_code_t)cellphone_screen_event_shown(), NULL);
 
     cellphone_navbar_refresh();
 }
@@ -758,7 +869,10 @@ void cellphone_chrome_set_visible(bool visible)
  * When LV_DEMO_CELLPHONE_SKIN is active, the skin layer draws
  * a phone bezel and provides an LCD container for the demo content.
  */
-static void create_demo(lv_obj_t * parent)
+static void create_demo(lv_obj_t * parent,
+                        const cellphone_screen_create_fn * initial_stack,
+                        const screen_refresh_state_t * initial_states,
+                        uint32_t initial_depth)
 {
     /* Touch feedback: darken clickable widgets on press (material 16% overlay).
      * Apply this only to widgets created inside the cellphone demo. */
@@ -813,12 +927,7 @@ static void create_demo(lv_obj_t * parent)
     apply_pressed_feedback_recursive(s_overlay_host);
     lv_obj_move_foreground(s_overlay_host);
 
-    /* Push the home screen as the bottom of the stack */
-    cellphone_screen_push(cellphone_home_create);
-
-    /* Push the lock screen on top -- it hides the chrome via
-     * cellphone_chrome_set_visible(false) in cellphone_lock_create() */
-    cellphone_screen_push(cellphone_lock_create);
+    create_stack_sequence(initial_stack, initial_states, initial_depth);
 
     /* Idle timer: auto-lock after 30s of inactivity */
     if(s_idle_timer) lv_timer_delete(s_idle_timer);
@@ -843,6 +952,104 @@ static void create_hosts(lv_obj_t * host_parent)
     lv_obj_set_pos(s_overlay_host, 0, 0);
     lv_obj_set_size(s_overlay_host, lv_pct(100), lv_pct(100));
     lv_obj_clear_flag(s_overlay_host, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
+}
+
+static void create_stack_sequence(const cellphone_screen_create_fn * fns,
+                                  const screen_refresh_state_t * states,
+                                  uint32_t depth)
+{
+    if(!fns || depth == 0) return;
+
+    bool transitions_enabled = s_screen_transitions_enabled;
+    cellphone_screen_set_transitions_enabled(false);
+    for(uint32_t i = 0; i < depth; i++) {
+        if(fns[i]) {
+            cellphone_screen_push(fns[i]);
+            screen_refresh_state_restore(fns[i], s_stack[s_stack_top].screen,
+                                         states ? &states[i] : NULL);
+        }
+    }
+    cellphone_screen_set_transitions_enabled(transitions_enabled);
+}
+
+static screen_refresh_state_t screen_refresh_state_capture(cellphone_screen_create_fn fn,
+                                                           lv_obj_t * screen)
+{
+    screen_refresh_state_t state;
+    lv_obj_t * scroll;
+
+    lv_memzero(&state, sizeof(state));
+
+    if(fn == cellphone_settings_create) {
+        state.screen_state = cellphone_settings_refresh_state_capture();
+    }
+    else if(fn == cellphone_home_create) {
+        state.screen_state = cellphone_home_refresh_state_capture();
+    }
+    else if(screen_create_fn_is_game(fn)) {
+        state.has_game_state = cellphone_game_refresh_state_capture(screen,
+                                                                    state.game_state,
+                                                                    sizeof(state.game_state));
+    }
+
+    scroll = screen_find_scrollable(screen);
+    if(scroll) {
+        state.has_scroll = true;
+        state.scroll_x = lv_obj_get_scroll_x(scroll);
+        state.scroll_y = lv_obj_get_scroll_y(scroll);
+    }
+
+    return state;
+}
+
+static void screen_refresh_state_restore(cellphone_screen_create_fn fn,
+                                         lv_obj_t * screen,
+                                         const screen_refresh_state_t * state)
+{
+    lv_obj_t * scroll;
+
+    if(state == NULL) return;
+
+    if(fn == cellphone_settings_create) {
+        cellphone_settings_refresh_state_restore(state->screen_state);
+    }
+    else if(fn == cellphone_home_create) {
+        cellphone_home_refresh_state_restore(state->screen_state);
+    }
+    else if(state->has_game_state && screen_create_fn_is_game(fn)) {
+        cellphone_game_refresh_state_restore(screen, state->game_state,
+                                             sizeof(state->game_state));
+    }
+
+    if(state->has_scroll) {
+        scroll = screen_find_scrollable(screen);
+        if(scroll) lv_obj_scroll_to(scroll, state->scroll_x, state->scroll_y, LV_ANIM_OFF);
+    }
+}
+
+static bool screen_create_fn_is_game(cellphone_screen_create_fn fn)
+{
+    return fn == cellphone_snake_create
+           || fn == cellphone_pong_create
+           || fn == cellphone_tetris_create;
+}
+
+static lv_obj_t * screen_find_scrollable(lv_obj_t * root)
+{
+    if(root == NULL) return NULL;
+
+    if(lv_obj_has_flag(root, LV_OBJ_FLAG_SCROLLABLE) &&
+       lv_obj_get_scroll_dir(root) != LV_DIR_NONE) {
+        return root;
+    }
+
+    uint32_t child_count = lv_obj_get_child_count(root);
+    for(uint32_t i = 0; i < child_count; i++) {
+        lv_obj_t * found = screen_find_scrollable(lv_obj_get_child(root, i));
+        if(found) return found;
+    }
+
+    return NULL;
 }
 
 static void screen_delete_timer_cb(lv_timer_t * timer)

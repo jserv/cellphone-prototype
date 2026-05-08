@@ -252,6 +252,16 @@ lv_obj_t * cellphone_screen_top(void);
 bool cellphone_screen_top_is(cellphone_screen_create_fn fn);
 
 /**
+ * Custom event code sent to a screen when it becomes the visible top screen.
+ */
+uint32_t cellphone_screen_event_shown(void);
+
+/**
+ * Custom event code sent to a screen when another screen covers it.
+ */
+uint32_t cellphone_screen_event_hidden(void);
+
+/**
  * Show or hide the status bar and nav bar overlays.
  * The lock screen hides them so it can be full-screen.
  */

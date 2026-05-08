@@ -1,12 +1,9 @@
 /**
  * @file lv_demo_cellphone_softkbd.c
  *
- * Soft keyboard implementation for the Cell Phone Demo.  Wraps
- * lv_keyboard and gives it a slide-up/slide-down lifecycle similar to
- * the IME window in mg-demos/softkbd.  The keyboard owns no global
- * state beyond a single instance pointer; if the host screen is
- * destroyed (e.g. user pops the chat), the keyboard goes with it and
- * the next call to cellphone_softkbd_show() rebuilds it.
+ * The keyboard owns no global state beyond a single instance pointer; if the
+ * host screen is destroyed (e.g. user pops the chat), the keyboard goes with
+ * it and the next call to cellphone_softkbd_show() rebuilds it.
  */
 
 #include "lv_demo_cellphone_softkbd.h"

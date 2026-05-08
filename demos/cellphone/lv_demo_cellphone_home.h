@@ -17,6 +17,8 @@ extern "C" {
  * Create the home screen launcher grid inside the given content area.
  */
 lv_obj_t * cellphone_home_create(lv_obj_t * parent);
+uint32_t cellphone_home_refresh_state_capture(void);
+void cellphone_home_refresh_state_restore(uint32_t state);
 
 #endif
 #ifdef __cplusplus

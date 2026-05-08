@@ -18,6 +18,9 @@
 #define INDICATOR_DOT_GAP    8
 #define INDICATOR_MARGIN_BOT 4
 #define ICON_LABEL_W         64
+#define ICON_PLATE_SIZE      (CELLPHONE_ICON_SIZE + 12)
+#define ICON_PLATE_Y         0
+#define ICON_LABEL_Y         (ICON_PLATE_SIZE + 6)
 
 /**********************
  *  STATIC PROTOTYPES
@@ -28,10 +31,9 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
                               const void * icon_src,
                               cellphone_screen_create_fn fn);
 static void create_camera_icon(lv_obj_t * parent, lv_color_t accent);
-static lv_color_t icon_accent_color(const char * label_text);
+static void create_arcade_icon(lv_obj_t * parent, const char * label_text);
+static void arcade_icon_draw_cb(lv_event_t * e);
 static void indicator_set_active(uint32_t active_idx, bool animated);
-static void icon_wobble_all(uint32_t stagger_ms);
-static void icon_wobble_stop_all(void);
 
 /**********************
  *  STATIC VARIABLES
@@ -42,6 +44,7 @@ static bool       s_edit_mode;
 static bool       s_ignore_release_click;
 static lv_obj_t * s_picked_icon;
 static lv_obj_t * s_tileview;
+static uint32_t   s_restore_page;
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -146,7 +149,34 @@ lv_obj_t * cellphone_home_create(lv_obj_t * parent)
     /* Listen for page changes */
     lv_obj_add_event_cb(tv, page_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    if(s_restore_page < s_page_count) {
+        lv_tileview_set_tile_by_index(tv, s_restore_page, 0, LV_ANIM_OFF);
+        indicator_set_active(s_restore_page, false);
+    }
+    s_restore_page = 0;
+
     return parent;
+}
+
+uint32_t cellphone_home_refresh_state_capture(void)
+{
+    lv_obj_t * tile;
+    int32_t tv_w;
+
+    if(!s_tileview || !lv_obj_is_valid(s_tileview)) return 0;
+
+    tile = lv_tileview_get_tile_active(s_tileview);
+    if(!tile) return 0;
+
+    tv_w = lv_obj_get_width(s_tileview);
+    if(tv_w <= 0) return 0;
+
+    return (uint32_t)(lv_obj_get_x(tile) / tv_w);
+}
+
+void cellphone_home_refresh_state_restore(uint32_t state)
+{
+    s_restore_page = state;
 }
 
 /**********************
@@ -159,10 +189,6 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
 {
     lv_obj_t * cont = cellphone_obj_bare(parent);
     lv_obj_set_size(cont, ICON_LABEL_W + 12, CELLPHONE_ICON_SIZE + CELLPHONE_ICON_LABEL_H + 18);
-    lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(cont, 6, 0);
     lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
@@ -170,21 +196,30 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
     if(icon_src) {
         lv_obj_t * img = lv_image_create(cont);
         lv_image_set_src(img, icon_src);
+        lv_obj_align(img, LV_ALIGN_TOP_MID, 0, ICON_PLATE_Y);
     }
     else {
-        lv_color_t accent = icon_accent_color(label_text);
-        lv_obj_t * icon_card = cellphone_obj_bare(cont);
-        lv_obj_set_size(icon_card, CELLPHONE_ICON_SIZE + 12, CELLPHONE_ICON_SIZE + 12);
-        lv_obj_clear_flag(icon_card, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_remove_flag(icon_card, LV_OBJ_FLAG_CLICKABLE);
-
-        if(lv_strcmp(label_text, "Camera") == 0) {
-            create_camera_icon(icon_card, accent);
+        if(lv_strcmp(label_text, "Camera") == 0 ||
+           lv_strcmp(label_text, "Snake") == 0 ||
+           lv_strcmp(label_text, "Pong") == 0 ||
+           lv_strcmp(label_text, "Tetris") == 0) {
+            if(lv_strcmp(label_text, "Camera") == 0) {
+                lv_obj_t * icon_card = cellphone_obj_bare(cont);
+                lv_obj_set_size(icon_card, ICON_PLATE_SIZE, ICON_PLATE_SIZE);
+                lv_obj_align(icon_card, LV_ALIGN_TOP_MID, 0, ICON_PLATE_Y);
+                lv_obj_clear_flag(icon_card, LV_OBJ_FLAG_SCROLLABLE);
+                lv_obj_remove_flag(icon_card, LV_OBJ_FLAG_CLICKABLE);
+                create_camera_icon(icon_card, lv_color_make(0x8c, 0x67, 0x52));
+            }
+            else {
+                create_arcade_icon(cont, label_text);
+            }
         }
         else {
             char buf[2] = { label_text[0], '\0' };
-            lv_obj_center(cellphone_label(icon_card, buf,
-                                          CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT));
+            lv_obj_t * placeholder = cellphone_label(cont, buf,
+                                                     CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT);
+            lv_obj_align(placeholder, LV_ALIGN_TOP_MID, 0, 10);
         }
     }
 
@@ -194,6 +229,7 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
     lv_obj_set_width(lbl, ICON_LABEL_W);
     lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(lbl, LV_LABEL_LONG_CLIP);
+    lv_obj_align(lbl, LV_ALIGN_TOP_MID, 0, ICON_LABEL_Y);
 
     /* One callback handles both click and long-press, avoiding a second
      * event descriptor per icon. */
@@ -235,6 +271,139 @@ static void create_camera_icon(lv_obj_t * parent, lv_color_t accent)
     lv_obj_remove_flag(flash, LV_OBJ_FLAG_CLICKABLE);
 }
 
+static void create_arcade_icon(lv_obj_t * parent, const char * label_text)
+{
+    lv_obj_add_event_cb(parent, arcade_icon_draw_cb, LV_EVENT_DRAW_MAIN, (void *)(uintptr_t)(label_text[0]));
+}
+
+static void arcade_icon_draw_cb(lv_event_t * e)
+{
+    lv_obj_t * obj = lv_event_get_target(e);
+    lv_layer_t * layer = lv_event_get_layer(e);
+    uintptr_t kind = (uintptr_t)lv_event_get_user_data(e);
+    lv_color_t accent = kind == 'S' ? lv_color_make(0x3f, 0x9b, 0x64)
+                        : kind == 'P' ? lv_color_make(0x3f, 0x78, 0xd6)
+                        : lv_color_make(0xe0, 0x78, 0x2c);
+    lv_area_t c;
+    lv_draw_rect_dsc_t rect;
+    lv_draw_line_dsc_t line;
+    lv_area_t a;
+    lv_area_t plate;
+    lv_color_t glyph = lv_color_white();
+
+    lv_obj_get_coords(obj, &c);
+    lv_draw_rect_dsc_init(&rect);
+    lv_draw_line_dsc_init(&line);
+    rect.bg_opa = LV_OPA_COVER;
+    line.color = glyph;
+    line.width = 4;
+    line.round_start = 1;
+    line.round_end = 1;
+    plate.x1 = c.x1 + (lv_obj_get_width(obj) - ICON_PLATE_SIZE) / 2 + 6;
+    plate.y1 = c.y1 + ICON_PLATE_Y + 6;
+    plate.x2 = plate.x1 + CELLPHONE_ICON_SIZE - 1;
+    plate.y2 = plate.y1 + CELLPHONE_ICON_SIZE - 1;
+    rect.bg_color = accent;
+    rect.radius = 9;
+    lv_draw_rect(layer, &rect, &plate);
+
+    rect.bg_color = lv_color_mix(accent, lv_color_white(), LV_OPA_20);
+    rect.radius = 8;
+    a.x1 = plate.x1 + 2;
+    a.y1 = plate.y1 + 2;
+    a.x2 = plate.x2 - 2;
+    a.y2 = plate.y1 + 8;
+    lv_draw_rect(layer, &rect, &a);
+
+    if(kind == 'S') {
+        lv_point_precise_t pts[] = {
+            { plate.x1 + 8,  plate.y1 + 24 }, { plate.x1 + 15, plate.y1 + 24 },
+            { plate.x1 + 15, plate.y1 + 17 }, { plate.x1 + 23, plate.y1 + 17 },
+            { plate.x1 + 23, plate.y1 + 27 }, { plate.x1 + 30, plate.y1 + 27 }
+        };
+        line.points = pts;
+        line.point_cnt = (int32_t)(sizeof(pts) / sizeof(pts[0]));
+        lv_draw_line(layer, &line);
+
+        rect.bg_color = glyph;
+        rect.radius = LV_RADIUS_CIRCLE;
+        a.x1 = plate.x1 + 27;
+        a.y1 = plate.y1 + 20;
+        a.x2 = plate.x1 + 34;
+        a.y2 = plate.y1 + 27;
+        lv_draw_rect(layer, &rect, &a);
+
+        rect.bg_color = accent;
+        a.x1 = plate.x1 + 30;
+        a.y1 = plate.y1 + 22;
+        a.x2 = plate.x1 + 31;
+        a.y2 = plate.y1 + 23;
+        lv_draw_rect(layer, &rect, &a);
+
+        rect.bg_color = lv_color_hex(0xe53935);
+        a.x1 = plate.x1 + 6;
+        a.y1 = plate.y1 + 10;
+        a.x2 = plate.x1 + 11;
+        a.y2 = plate.y1 + 15;
+        lv_draw_rect(layer, &rect, &a);
+    }
+    else if(kind == 'P') {
+        rect.bg_color = glyph;
+        rect.radius = 3;
+        a.x1 = plate.x1 + 6;
+        a.y1 = plate.y1 + 11;
+        a.x2 = plate.x1 + 10;
+        a.y2 = plate.y1 + 30;
+        lv_draw_rect(layer, &rect, &a);
+        a.x1 = plate.x2 - 9;
+        a.y1 = plate.y1 + 11;
+        a.x2 = plate.x2 - 5;
+        a.y2 = plate.y1 + 30;
+        lv_draw_rect(layer, &rect, &a);
+
+        rect.bg_color = lv_color_hex(0x4dd0e1);
+        rect.radius = LV_RADIUS_CIRCLE;
+        a.x1 = plate.x1 + 17;
+        a.y1 = plate.y1 + 16;
+        a.x2 = plate.x1 + 23;
+        a.y2 = plate.y1 + 22;
+        lv_draw_rect(layer, &rect, &a);
+
+        rect.bg_color = lv_color_mix(glyph, accent, LV_OPA_40);
+        rect.radius = 1;
+        a.x1 = plate.x1 + 19;
+        a.y1 = plate.y1 + 8;
+        a.x2 = plate.x1 + 20;
+        a.y2 = plate.y1 + 13;
+        lv_draw_rect(layer, &rect, &a);
+        a.y1 = plate.y1 + 25;
+        a.y2 = plate.y1 + 30;
+        lv_draw_rect(layer, &rect, &a);
+    }
+    else {
+        static const struct {
+            int16_t x;
+            int16_t y;
+            uint8_t color_id;
+        } blocks[] = {
+            { 8, 9,  0 }, { 14, 9, 0 }, { 20, 9, 0 }, { 26, 9, 0 },
+            { 14, 16, 1 }, { 20, 16, 1 }, { 14, 23, 2 }, { 20, 23, 2 },
+        };
+
+        rect.radius = 2;
+        for(uint32_t i = 0; i < sizeof(blocks) / sizeof(blocks[0]); i++) {
+            if(blocks[i].color_id == 0) rect.bg_color = glyph;
+            else if(blocks[i].color_id == 1) rect.bg_color = lv_color_make(0xff, 0xd5, 0x4f);
+            else rect.bg_color = lv_color_make(0x81, 0xd4, 0xfa);
+            a.x1 = plate.x1 + blocks[i].x;
+            a.y1 = plate.y1 + blocks[i].y + 2;
+            a.x2 = a.x1 + 5;
+            a.y2 = a.y1 + 5;
+            lv_draw_rect(layer, &rect, &a);
+        }
+    }
+}
+
 static void icon_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -247,7 +416,6 @@ static void icon_event_cb(lv_event_t * e)
 
         /* If in edit mode, tapping an icon exits edit mode instead of launching */
         if(s_edit_mode) {
-            icon_wobble_stop_all();
             if(s_picked_icon) {
                 cellphone_anim_drop(s_picked_icon);
                 s_picked_icon = NULL;
@@ -278,48 +446,8 @@ static void icon_event_cb(lv_event_t * e)
     s_ignore_release_click = true;
 
     lv_obj_t * pressed = lv_event_get_target(e);
-    icon_wobble_all(50);
-
-    /* E3: Pickup effect on the long-pressed icon */
     s_picked_icon = pressed;
     cellphone_anim_pickup(pressed);
-}
-
-static void icon_wobble_all(uint32_t stagger_ms)
-{
-    if(!s_tileview) return;
-
-    uint32_t icon_idx = 0;
-    uint32_t tile_count = lv_obj_get_child_count(s_tileview);
-    for(uint32_t t = 0; t < tile_count; t++) {
-        lv_obj_t * tile = lv_obj_get_child(s_tileview, t);
-        uint32_t child_count = lv_obj_get_child_count(tile);
-        for(uint32_t i = 0; i < child_count; i++) {
-            cellphone_anim_wobble_start(lv_obj_get_child(tile, i), icon_idx * stagger_ms);
-            icon_idx++;
-        }
-    }
-}
-
-static void icon_wobble_stop_all(void)
-{
-    if(!s_tileview) return;
-
-    uint32_t tile_count = lv_obj_get_child_count(s_tileview);
-    for(uint32_t t = 0; t < tile_count; t++) {
-        lv_obj_t * tile = lv_obj_get_child(s_tileview, t);
-        uint32_t child_count = lv_obj_get_child_count(tile);
-        for(uint32_t i = 0; i < child_count; i++) {
-            cellphone_anim_wobble_stop(lv_obj_get_child(tile, i));
-        }
-    }
-}
-
-static lv_color_t icon_accent_color(const char * label_text)
-{
-    uint32_t hash = 0;
-    for(const char * p = label_text; *p; p++) hash = hash * 31U + (uint32_t) * p;
-    return lv_color_hsv_to_rgb((uint8_t)(hash % 256U), 42, 88);
 }
 
 static void indicator_set_active(uint32_t active_idx, bool animated)

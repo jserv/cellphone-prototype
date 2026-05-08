@@ -1,10 +1,8 @@
 /**
  * @file lv_demo_cellphone_softkbd.h
  *
- * Soft keyboard for the Cell Phone Demo, modeled after the show/hide
- * lifecycle of mg-demos/softkbd but built on lv_keyboard.  The keyboard
- * is anchored to the bottom of a host content area and is shown only
- * while a textarea is being edited.
+ * The keyboard is anchored to the bottom of a host content area and is shown
+ * only while a textarea is being edited.
  */
 
 #ifndef LV_DEMO_CELLPHONE_SOFTKBD_H

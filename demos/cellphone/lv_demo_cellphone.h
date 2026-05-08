@@ -42,6 +42,13 @@ void lv_demo_cellphone_with_args(const lv_demo_args_t * args);
  */
 void lv_demo_cellphone_rebuild(void);
 
+/**
+ * Rebuild the demo in-place while preserving the current screen stack.
+ * Used when a theme change should take effect immediately without
+ * jumping back to the lock screen.
+ */
+void lv_demo_cellphone_refresh_theme(void);
+
 /**********************
  *      MACROS
  **********************/

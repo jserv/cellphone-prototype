@@ -27,8 +27,16 @@ typedef struct {
 } cellphone_contact_t;
 
 #define CELLPHONE_CONTACT_COUNT 12
+#define CELLPHONE_CONTACT_CAPACITY 16
 
-const cellphone_contact_t * cellphone_data_contacts(void);
+/* Stock entries stay in flash; only user-added entries cost RAM.
+ * Returns NULL when idx >= count, so callers can skip explicit bounds checks. */
+const cellphone_contact_t * cellphone_data_contact_at(uint32_t idx);
+uint32_t cellphone_data_contact_count(void);
+int32_t cellphone_data_contact_add(const char * name,
+                                   const char * phone,
+                                   const char * email);
+void cellphone_data_reset_mutable(void);
 
 /*********************
  * SMS

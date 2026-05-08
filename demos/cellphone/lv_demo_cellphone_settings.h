@@ -14,6 +14,8 @@ extern "C" {
 #if LV_USE_DEMO_CELLPHONE
 
 lv_obj_t * cellphone_settings_create(lv_obj_t * parent);
+uint32_t cellphone_settings_refresh_state_capture(void);
+void cellphone_settings_refresh_state_restore(uint32_t state);
 
 #endif
 #ifdef __cplusplus

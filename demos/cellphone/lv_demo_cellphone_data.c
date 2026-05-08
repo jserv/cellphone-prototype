@@ -11,7 +11,7 @@
 /*********************
  * CONTACTS
  *********************/
-static const cellphone_contact_t s_contacts[CELLPHONE_CONTACT_COUNT] = {
+static const cellphone_contact_t s_contacts_stock[CELLPHONE_CONTACT_COUNT] = {
     { "Ashley Johnson",  "+1-555-0101", "ashley@example.com",   'A' },
     { "Brian Smith",     "+1-555-0102", "brian@example.com",    'B' },
     { "Chris Williams",  "+1-555-0103", "chris@example.com",    'C' },
@@ -26,9 +26,124 @@ static const cellphone_contact_t s_contacts[CELLPHONE_CONTACT_COUNT] = {
     { "Laura Jackson",   "+1-555-0112", "laura@example.com",    'L' },
 };
 
-const cellphone_contact_t * cellphone_data_contacts(void)
+#define CONTACT_ADDED_MAX (CELLPHONE_CONTACT_CAPACITY - CELLPHONE_CONTACT_COUNT)
+#define CONTACT_ORDER_ADDED 0x80u  /* high bit flags an added-slot index */
+
+static cellphone_contact_t s_contacts_added[CONTACT_ADDED_MAX];
+static char s_added_names[CONTACT_ADDED_MAX][32];
+static char s_added_phones[CONTACT_ADDED_MAX][24];
+static char s_added_emails[CONTACT_ADDED_MAX][40];
+
+/* High bit of an order entry flags an added-slot index, so the visible
+ * list stays sorted without copying stock rows into RAM. */
+static uint8_t s_contact_order[CELLPHONE_CONTACT_CAPACITY];
+static uint32_t s_contact_count;
+static bool s_contacts_inited;
+
+static void contacts_init(void)
 {
-    return s_contacts;
+    if(s_contacts_inited) return;
+
+    for(uint32_t i = 0; i < CELLPHONE_CONTACT_COUNT; i++) {
+        s_contact_order[i] = (uint8_t)i;
+    }
+
+    s_contact_count = CELLPHONE_CONTACT_COUNT;
+    s_contacts_inited = true;
+}
+
+static const cellphone_contact_t * contact_resolve(uint8_t ord)
+{
+    if(ord & CONTACT_ORDER_ADDED) return &s_contacts_added[ord & 0x7Fu];
+    return &s_contacts_stock[ord];
+}
+
+static int32_t contact_name_cmp_folded(const char * lhs, const char * rhs)
+{
+    uint32_t i = 0;
+
+    while(lhs[i] != '\0' && rhs[i] != '\0') {
+        char a = lhs[i];
+        char b = rhs[i];
+
+        if(a >= 'a' && a <= 'z') a = (char)(a - 'a' + 'A');
+        if(b >= 'a' && b <= 'z') b = (char)(b - 'a' + 'A');
+
+        if(a != b) return (int32_t)((unsigned char)a - (unsigned char)b);
+        i++;
+    }
+
+    return (int32_t)((unsigned char)lhs[i] - (unsigned char)rhs[i]);
+}
+
+static char contact_initial_for(const char * name)
+{
+    if(name == NULL || name[0] == '\0') return '#';
+
+    char c = name[0];
+    if(c >= 'a' && c <= 'z') c = (char)(c - 'a' + 'A');
+    if((c < 'A' || c > 'Z') && (c < '0' || c > '9')) return '#';
+    return c;
+}
+
+const cellphone_contact_t * cellphone_data_contact_at(uint32_t idx)
+{
+    contacts_init();
+    if(idx >= s_contact_count) return NULL;
+    return contact_resolve(s_contact_order[idx]);
+}
+
+uint32_t cellphone_data_contact_count(void)
+{
+    contacts_init();
+    return s_contact_count;
+}
+
+int32_t cellphone_data_contact_add(const char * name,
+                                   const char * phone,
+                                   const char * email)
+{
+    contacts_init();
+
+    if(!name || name[0] == '\0') return -1;
+    if(s_contact_count >= CELLPHONE_CONTACT_CAPACITY) return -1;
+    if(!phone) phone = "";
+    if(!email) email = "";
+
+    uint32_t buf_idx = s_contact_count - CELLPHONE_CONTACT_COUNT;
+    lv_snprintf(s_added_names[buf_idx], sizeof(s_added_names[buf_idx]), "%s", name);
+    lv_snprintf(s_added_phones[buf_idx], sizeof(s_added_phones[buf_idx]), "%s", phone);
+    lv_snprintf(s_added_emails[buf_idx], sizeof(s_added_emails[buf_idx]), "%s", email);
+
+    s_contacts_added[buf_idx] = (cellphone_contact_t) {
+        .name = s_added_names[buf_idx],
+        .phone = s_added_phones[buf_idx],
+        .email = s_added_emails[buf_idx],
+        .initial = contact_initial_for(s_added_names[buf_idx]),
+    };
+
+    uint32_t insert_at = s_contact_count;
+    for(uint32_t i = 0; i < s_contact_count; i++) {
+        const cellphone_contact_t * existing = contact_resolve(s_contact_order[i]);
+        if(contact_name_cmp_folded(s_contacts_added[buf_idx].name, existing->name) < 0) {
+            insert_at = i;
+            break;
+        }
+    }
+
+    for(uint32_t i = s_contact_count; i > insert_at; i--) {
+        s_contact_order[i] = s_contact_order[i - 1];
+    }
+
+    s_contact_order[insert_at] = (uint8_t)(CONTACT_ORDER_ADDED | buf_idx);
+    s_contact_count++;
+    return (int32_t)insert_at;
+}
+
+void cellphone_data_reset_mutable(void)
+{
+    s_contacts_inited = false;
+    contacts_init();
 }
 
 /*********************

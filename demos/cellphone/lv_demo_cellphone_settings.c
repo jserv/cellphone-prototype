@@ -22,6 +22,8 @@ static lv_obj_t * create_sound_page(lv_obj_t * menu);
 static lv_obj_t * create_wallpaper_page(lv_obj_t * menu);
 static lv_obj_t * create_time_page(lv_obj_t * menu);
 static lv_obj_t * create_about_page(lv_obj_t * menu);
+static void settings_menu_changed_cb(lv_event_t * e);
+static void settings_menu_delete_cb(lv_event_t * e);
 static lv_obj_t * setting_dropdown(lv_obj_t * page, const char * label,
                                    const char * opts, uint32_t selected,
                                    lv_event_cb_t cb);
@@ -43,7 +45,25 @@ static void theme_dropdown_cb(lv_event_t * e);
 /**********************
  *  STATIC VARIABLES
  **********************/
-static lv_timer_t * s_theme_rebuild_timer;
+static lv_timer_t * s_theme_apply_timer;
+static lv_obj_t * s_menu;
+static lv_obj_t * s_main_page;
+static lv_obj_t * s_display_page;
+static lv_obj_t * s_sound_page;
+static lv_obj_t * s_wallpaper_page;
+static lv_obj_t * s_time_page;
+static lv_obj_t * s_about_page;
+static uint32_t s_current_page_id;
+static uint32_t s_restore_page_id;
+
+enum {
+    SETTINGS_PAGE_ROOT = 0,
+    SETTINGS_PAGE_DISPLAY,
+    SETTINGS_PAGE_SOUND,
+    SETTINGS_PAGE_WALLPAPER,
+    SETTINGS_PAGE_TIME,
+    SETTINGS_PAGE_ABOUT,
+};
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -93,7 +113,45 @@ lv_obj_t * cellphone_settings_create(lv_obj_t * parent)
 
     lv_menu_set_page(menu, main_page);
 
+    s_menu = menu;
+    s_main_page = main_page;
+    s_display_page = display_page;
+    s_sound_page = sound_page;
+    s_wallpaper_page = wallpaper_page;
+    s_time_page = time_page;
+    s_about_page = about_page;
+    s_current_page_id = SETTINGS_PAGE_ROOT;
+
+    lv_obj_add_event_cb(menu, settings_menu_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(menu, settings_menu_delete_cb, LV_EVENT_DELETE, NULL);
+
+    if(s_restore_page_id != SETTINGS_PAGE_ROOT) {
+        cellphone_settings_refresh_state_restore(s_restore_page_id);
+        s_restore_page_id = SETTINGS_PAGE_ROOT;
+    }
+
     return parent;
+}
+
+uint32_t cellphone_settings_refresh_state_capture(void)
+{
+    return s_current_page_id;
+}
+
+void cellphone_settings_refresh_state_restore(uint32_t state)
+{
+    lv_obj_t * page = s_main_page;
+
+    s_restore_page_id = state;
+    if(s_menu == NULL) return;
+
+    if(state == SETTINGS_PAGE_DISPLAY) page = s_display_page;
+    else if(state == SETTINGS_PAGE_SOUND) page = s_sound_page;
+    else if(state == SETTINGS_PAGE_WALLPAPER) page = s_wallpaper_page;
+    else if(state == SETTINGS_PAGE_TIME) page = s_time_page;
+    else if(state == SETTINGS_PAGE_ABOUT) page = s_about_page;
+
+    if(page) lv_menu_set_page(s_menu, page);
 }
 
 /**********************
@@ -258,6 +316,32 @@ static lv_obj_t * create_about_page(lv_obj_t * menu)
     return page;
 }
 
+static void settings_menu_changed_cb(lv_event_t * e)
+{
+    lv_obj_t * menu = lv_event_get_target(e);
+    lv_obj_t * page = lv_menu_get_cur_main_page(menu);
+
+    if(page == s_display_page) s_current_page_id = SETTINGS_PAGE_DISPLAY;
+    else if(page == s_sound_page) s_current_page_id = SETTINGS_PAGE_SOUND;
+    else if(page == s_wallpaper_page) s_current_page_id = SETTINGS_PAGE_WALLPAPER;
+    else if(page == s_time_page) s_current_page_id = SETTINGS_PAGE_TIME;
+    else if(page == s_about_page) s_current_page_id = SETTINGS_PAGE_ABOUT;
+    else s_current_page_id = SETTINGS_PAGE_ROOT;
+}
+
+static void settings_menu_delete_cb(lv_event_t * e)
+{
+    if(lv_event_get_target(e) != s_menu) return;
+
+    s_menu = NULL;
+    s_main_page = NULL;
+    s_display_page = NULL;
+    s_sound_page = NULL;
+    s_wallpaper_page = NULL;
+    s_time_page = NULL;
+    s_about_page = NULL;
+}
+
 static lv_obj_t * setting_dropdown(lv_obj_t * page, const char * label,
                                    const char * opts, uint32_t selected,
                                    lv_event_cb_t cb)
@@ -323,11 +407,11 @@ static void style_dropdown_list(lv_obj_t * dd)
     }
 }
 
-static void theme_rebuild_timer_cb(lv_timer_t * t)
+static void theme_apply_timer_cb(lv_timer_t * t)
 {
-    s_theme_rebuild_timer = NULL;
+    s_theme_apply_timer = NULL;
     lv_timer_delete(t);
-    lv_demo_cellphone_rebuild();
+    lv_demo_cellphone_refresh_theme();
 }
 
 static void theme_dropdown_cb(lv_event_t * e)
@@ -341,9 +425,9 @@ static void theme_dropdown_cb(lv_event_t * e)
     /* Defer the rebuild to the next timer tick so we return from this
      * event callback before the widget tree is destroyed. Coalesce rapid
      * re-selection so we do not queue duplicate zero-delay timers. */
-    if(s_theme_rebuild_timer == NULL) {
-        s_theme_rebuild_timer = lv_timer_create(theme_rebuild_timer_cb, 0, NULL);
-        if(s_theme_rebuild_timer) lv_timer_set_repeat_count(s_theme_rebuild_timer, 1);
+    if(s_theme_apply_timer == NULL) {
+        s_theme_apply_timer = lv_timer_create(theme_apply_timer_cb, 0, NULL);
+        if(s_theme_apply_timer) lv_timer_set_repeat_count(s_theme_apply_timer, 1);
     }
 }
 

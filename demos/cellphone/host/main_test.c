@@ -20,11 +20,13 @@
 #include "demos/cellphone/lv_demo_cellphone_dialer.h"
 #include "demos/cellphone/lv_demo_cellphone_calc.h"
 #include "demos/cellphone/lv_demo_cellphone_contacts.h"
+#include "demos/cellphone/lv_demo_cellphone_data.h"
 #include "demos/cellphone/lv_demo_cellphone_navbar.h"
 #include "demos/cellphone/lv_demo_cellphone_sms.h"
 #include "demos/cellphone/lv_demo_cellphone_music.h"
 #include "demos/cellphone/lv_demo_cellphone_photo.h"
 #include "demos/cellphone/lv_demo_cellphone_settings.h"
+#include "demos/cellphone/lv_demo_cellphone_game.h"
 #include "demos/cellphone/lv_demo_cellphone_calllog.h"
 #include "demos/cellphone/mem_report.h"
 #if defined(LV_DEMO_CELLPHONE_SKIN) && LV_DEMO_CELLPHONE_SKIN && LV_USE_SDL
@@ -382,6 +384,23 @@ static lv_obj_t * find_widget_by_class(lv_obj_t * root, const lv_obj_class_t * c
     return NULL;
 }
 
+static lv_obj_t * find_first_scrollable_descendant(lv_obj_t * root)
+{
+    if(!root) return NULL;
+    if(lv_obj_has_flag(root, LV_OBJ_FLAG_SCROLLABLE) &&
+       lv_obj_get_scroll_dir(root) != LV_DIR_NONE) {
+        return root;
+    }
+
+    uint32_t cc = lv_obj_get_child_count(root);
+    for(uint32_t i = 0; i < cc; i++) {
+        lv_obj_t * f = find_first_scrollable_descendant(lv_obj_get_child(root, i));
+        if(f) return f;
+    }
+
+    return NULL;
+}
+
 /** Convert display-global coordinates (what lv_obj_get_coords returns)
  *  to LCD-local (what sim_set_touch_point expects).  When the bezel skin
  *  is active the SDL window is larger than the LCD, and sim_set_touch_point
@@ -460,6 +479,21 @@ static lv_obj_t * find_label_obj(lv_obj_t * root, const char * text)
     uint32_t cc = lv_obj_get_child_count(root);
     for(uint32_t i = 0; i < cc; i++) {
         lv_obj_t * f = find_label_obj(lv_obj_get_child(root, i), text);
+        if(f) return f;
+    }
+    return NULL;
+}
+
+static lv_obj_t * find_label_prefix_obj(lv_obj_t * root, const char * prefix)
+{
+    if(!root) return NULL;
+    if(lv_obj_check_type(root, &lv_label_class)) {
+        const char * t = lv_label_get_text(root);
+        if(t && strncmp(t, prefix, strlen(prefix)) == 0) return root;
+    }
+    uint32_t cc = lv_obj_get_child_count(root);
+    for(uint32_t i = 0; i < cc; i++) {
+        lv_obj_t * f = find_label_prefix_obj(lv_obj_get_child(root, i), prefix);
         if(f) return f;
     }
     return NULL;
@@ -1007,6 +1041,239 @@ static void test_settings_gestures(void)
            test_peak_get() / 1024);
 }
 
+/** Theme refresh should repaint the current screen in-place rather than
+ *  bouncing back to the lock screen. Gate on three things:
+ *  1. stack depth and top screen stay on Contacts,
+ *  2. no lock screen reappears,
+ *  3. a concrete themed surface (list-button bg) changes to the new CARD. */
+static void test_theme_refresh_in_place(void)
+{
+    printf("\n--- Test: Theme refresh in place ---\n");
+    int depth_before;
+    lv_obj_t * top;
+    lv_obj_t * tileview;
+    lv_obj_t * tile;
+    lv_obj_t * list;
+    lv_obj_t * snake_screen;
+    lv_obj_t * snake_status;
+    char snake_before[64];
+    uint32_t nth;
+    lv_coord_t scroll_before;
+    int32_t home_page_before;
+
+    cellphone_theme_set(0);
+    lv_demo_cellphone_rebuild();
+    sim_wait(500);
+    cellphone_screen_pop();
+    sim_wait(500);
+    cellphone_screen_home();
+    sim_wait(500);
+    depth_before = cellphone_screen_depth();
+
+    top = cellphone_screen_top();
+    check("Home visible before theme refresh",
+          cellphone_screen_top_is(cellphone_home_create));
+    check("Home screen starts with Olive BG",
+          top && lv_color_eq(lv_obj_get_style_bg_color(top, 0), cellphone_theme_get(0)->bg));
+
+    cellphone_screen_push(cellphone_settings_create);
+    sim_wait(500);
+    check("Settings pushed for theme refresh test",
+          cellphone_screen_top_is(cellphone_settings_create));
+
+    sim_click(CELLPHONE_HOR_RES / 2, CELLPHONE_CONTENT_Y + 18);
+    sim_wait(500);
+    check("Display submenu opened before theme refresh",
+          find_label_obj(cellphone_screen_top(), "Brightness") != NULL);
+
+    cellphone_theme_set(1);
+    lv_demo_cellphone_refresh_theme();
+    sim_wait(500);
+
+    top = cellphone_screen_top();
+    check("theme refresh keeps Settings on top",
+          cellphone_screen_top_is(cellphone_settings_create));
+    check("theme refresh does not reopen lock screen",
+          !cellphone_screen_top_is(cellphone_lock_create));
+    check("theme refresh preserves stack depth", cellphone_screen_depth() == depth_before + 1);
+    check("theme refresh preserves Settings submenu",
+          find_label_obj(top, "Brightness") != NULL);
+    cellphone_screen_pop();
+    sim_wait(500);
+
+    top = cellphone_screen_top();
+    check("Home screen repaints to Dark BG",
+          top && lv_color_eq(lv_obj_get_style_bg_color(top, 0), cellphone_theme_get(1)->bg));
+
+    tileview = find_widget_by_class(top, &lv_tileview_class);
+    tile = tileview ? lv_tileview_get_tile_active(tileview) : NULL;
+    check("Home tileview present after refresh", tileview != NULL);
+    if(tileview) {
+        lv_tileview_set_tile_by_index(tileview, 1, 0, LV_ANIM_OFF);
+        sim_wait(100);
+        tile = lv_tileview_get_tile_active(tileview);
+        home_page_before = tile ? (int32_t)(lv_obj_get_x(tile) / lv_obj_get_width(tileview)) : -1;
+        cellphone_theme_set(0);
+        lv_demo_cellphone_refresh_theme();
+        sim_wait(100);
+        top = cellphone_screen_top();
+        tileview = find_widget_by_class(top, &lv_tileview_class);
+        tile = tileview ? lv_tileview_get_tile_active(tileview) : NULL;
+        check("theme refresh preserves Home top screen",
+              cellphone_screen_top_is(cellphone_home_create));
+        check("theme refresh preserves Home page",
+              tileview && tile
+              && (int32_t)(lv_obj_get_x(tile) / lv_obj_get_width(tileview)) == home_page_before);
+    }
+
+    cellphone_screen_push(cellphone_calllog_create);
+    sim_wait(500);
+    list = find_first_scrollable_descendant(cellphone_screen_top());
+    check("Call Log scrollable list present", list != NULL);
+    if(list) {
+        lv_obj_scroll_to_y(list, CELLPHONE_LIST_ROW_H * 3, LV_ANIM_OFF);
+        sim_wait(100);
+        scroll_before = lv_obj_get_scroll_y(list);
+        cellphone_theme_set(1);
+        lv_demo_cellphone_refresh_theme();
+        sim_wait(100);
+        list = find_first_scrollable_descendant(cellphone_screen_top());
+        check("theme refresh keeps Call Log on top",
+              cellphone_screen_top_is(cellphone_calllog_create));
+        check("theme refresh preserves Call Log scroll position",
+              list && lv_obj_get_scroll_y(list) == scroll_before);
+    }
+    cellphone_screen_pop();
+    sim_wait(500);
+
+    cellphone_screen_push(cellphone_snake_create);
+    sim_wait(500);
+    snake_screen = cellphone_screen_top();
+    snake_status = find_label_prefix_obj(snake_screen, "Auto-play");
+    check("Snake status label present for theme refresh", snake_status != NULL);
+    lv_snprintf(snake_before, sizeof(snake_before), "%s",
+                snake_status ? lv_label_get_text(snake_status) : "");
+    cellphone_theme_set(0);
+    lv_demo_cellphone_refresh_theme();
+    sim_wait(20);
+    snake_screen = cellphone_screen_top();
+    snake_status = find_label_prefix_obj(snake_screen, "Auto-play");
+    check("theme refresh keeps Snake on top",
+          cellphone_screen_top_is(cellphone_snake_create));
+    check("theme refresh preserves Snake state text",
+          snake_status && strcmp(lv_label_get_text(snake_status), snake_before) == 0);
+    cellphone_screen_pop();
+    sim_wait(500);
+}
+
+static void test_contacts_add_focus_chain(void)
+{
+    printf("\n--- Test: Contacts add focus chain ---\n");
+    lv_obj_t * name_ta;
+    lv_obj_t * phone_ta;
+    lv_obj_t * email_ta;
+
+    cellphone_screen_push(cellphone_contacts_create);
+    sim_wait(500);
+    check("Contacts pushed for add-focus test",
+          cellphone_screen_top_is(cellphone_contacts_create));
+    check("add-contact overlay opens", cellphone_contacts_test_open_add_overlay());
+    name_ta = cellphone_contacts_test_get_add_field(0);
+    phone_ta = cellphone_contacts_test_get_add_field(1);
+    email_ta = cellphone_contacts_test_get_add_field(2);
+    check("add-contact form exposes three textareas",
+          name_ta && phone_ta && email_ta);
+    if(name_ta && phone_ta && email_ta) {
+        lv_obj_add_state(name_ta, LV_STATE_FOCUSED);
+        check("focus advances from Name to Phone",
+              cellphone_contacts_test_advance_add_focus(0));
+        check("Name field clears focus when moving to Phone",
+              !lv_obj_has_state(name_ta, LV_STATE_FOCUSED));
+        check("Phone field gains focus after Name READY",
+              lv_obj_has_state(phone_ta, LV_STATE_FOCUSED));
+
+        check("focus advances from Phone to Email",
+              cellphone_contacts_test_advance_add_focus(1));
+        check("Phone field clears focus when moving to Email",
+              !lv_obj_has_state(phone_ta, LV_STATE_FOCUSED));
+        check("Email field is sole focused field after second READY",
+              lv_obj_has_state(email_ta, LV_STATE_FOCUSED)
+              && !lv_obj_has_state(name_ta, LV_STATE_FOCUSED));
+    }
+
+    cellphone_screen_pop();
+    sim_wait(500);
+}
+
+static void test_contacts_mutation_lifecycle(void)
+{
+    printf("\n--- Test: Contacts mutation lifecycle ---\n");
+
+    lv_demo_cellphone_rebuild();
+    sim_wait(500);
+    cellphone_screen_pop();
+    sim_wait(500);
+
+    check("contacts reset to stock count on rebuild",
+          cellphone_data_contact_count() == CELLPHONE_CONTACT_COUNT);
+
+    int32_t idx = cellphone_data_contact_add("aaron", "+1-555-0199", "aaron@example.com");
+    const cellphone_contact_t * c0 = cellphone_data_contact_at(0);
+    check("lowercase contact inserts successfully", idx >= 0);
+    check("lowercase contact sorts with uppercase A section",
+          idx == 0 && c0 && lv_strcmp(c0->name, "aaron") == 0);
+
+    check("contact count increments after add",
+          cellphone_data_contact_count() == CELLPHONE_CONTACT_COUNT + 1);
+
+    lv_demo_cellphone_rebuild();
+    sim_wait(500);
+    cellphone_screen_pop();
+    sim_wait(500);
+
+    c0 = cellphone_data_contact_at(0);
+    check("fresh rebuild restores stock contact count",
+          cellphone_data_contact_count() == CELLPHONE_CONTACT_COUNT);
+    check("fresh rebuild removes added contact",
+          c0 && lv_strcmp(c0->name, "Ashley Johnson") == 0);
+}
+
+static void test_arcade_timer_visibility(void)
+{
+    printf("\n--- Test: Arcade timer visibility ---\n");
+    lv_obj_t * snake_screen;
+    lv_obj_t * snake_status;
+    char status_before[64];
+    const char * status_hidden;
+
+    cellphone_screen_home();
+    sim_wait(500);
+
+    cellphone_screen_push(cellphone_snake_create);
+    sim_wait(500);
+    snake_screen = cellphone_screen_top();
+    check("Snake pushed", cellphone_screen_top_is(cellphone_snake_create));
+
+    snake_status = find_label_prefix_obj(snake_screen, "Auto-play");
+    check("Snake status label present", snake_status != NULL);
+    lv_snprintf(status_before, sizeof(status_before), "%s",
+                snake_status ? lv_label_get_text(snake_status) : "");
+
+    cellphone_screen_push(cellphone_calc_create);
+    sim_wait(500);
+    check("Calculator covers Snake", cellphone_screen_top_is(cellphone_calc_create));
+
+    status_hidden = snake_status ? lv_label_get_text(snake_status) : NULL;
+    check("hidden Snake stops updating state text",
+          status_hidden && strcmp(status_before, status_hidden) == 0);
+
+    cellphone_screen_pop();
+    sim_wait(500);
+    check("returned to Snake", cellphone_screen_top_is(cellphone_snake_create));
+    cellphone_screen_pop();
+    sim_wait(500);
+}
+
 /** Walk the active contacts and call-log lists and assert every visible
  *  row paints with the active theme's CARD color.  Catches regressions
  *  that drop the explicit `cellphone_obj_paint_fill(btn, CARD)` override
@@ -1293,6 +1560,10 @@ int main(int argc, char ** argv)
     if(!s_focused_mode) test_app("Music",      cellphone_music_create);
     if(!s_focused_mode) test_photos_gestures();
     if(!s_focused_mode) test_settings_gestures();
+    if(!s_focused_mode) test_theme_refresh_in_place();
+    if(!s_focused_mode) test_contacts_add_focus_chain();
+    if(!s_focused_mode) test_contacts_mutation_lifecycle();
+    if(!s_focused_mode) test_arcade_timer_visibility();
     test_app("Call Log",    cellphone_calllog_create);
 
     if(s_focused_mode) {
