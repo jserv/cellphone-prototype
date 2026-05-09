@@ -1,0 +1,35 @@
+demos/cellphone/build.sh
+  s_80dd85dbfa53bb::t_45091aae6d2c1c 248-273
+  s_80dd85dbfa53bb::t_ee9e0853f08d76 13
+  s_80dd85dbfa53bb::t_a74e5cac195ed7 198-205
+demos/cellphone/README.md
+  s_80dd85dbfa53bb::t_999754475d496d 202-229
+  s_80dd85dbfa53bb::t_f0e3b67684f9a7 244-248
+  s_80dd85dbfa53bb::t_b7ec2b7fc94321 162,171-186
+  s_80dd85dbfa53bb::t_ef3a1fc959e684 84-85,92-93,95
+  s_80dd85dbfa53bb::t_9e323576a9d888 100-101,105-108,111-117
+  s_80dd85dbfa53bb::t_826ffa44431029 282-299
+  s_80dd85dbfa53bb::t_d02d368abb89d9 16-22,29-31
+demos/cellphone/main_test.c
+  s_80dd85dbfa53bb::t_1b06e1f60e0a8e 70-72,76,78,84
+  s_80dd85dbfa53bb::t_923a3966318312 46-69,73-75,77,79-83,85-87
+  s_80dd85dbfa53bb::t_8e83d673357ca9 896-899
+  s_80dd85dbfa53bb::t_e0e5396d202fec 832-835
+  s_80dd85dbfa53bb::t_92e33fcd06cae7 1762-1768,1780
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "7d69ec7ac6100534f462d85c00f112459fa5e229",
+  "prompts": {},
+  "sessions": {
+    "s_80dd85dbfa53bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "67da456c-c448-40b3-a777-4167ed33decf",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
