@@ -1,0 +1,33 @@
+src/font/font_vec/lv_font_vec_default_roman.c
+  s_7cb5a859b1ec84::t_046e0556fae119 1-1193
+include/lvgl/config/lv_conf_internal.h
+  s_7cb5a859b1ec84::t_046e0556fae119 2145-2171
+include/lvgl/font/lv_font_vec.h
+  s_7cb5a859b1ec84::t_046e0556fae119 1-213
+include/lvgl/lvgl.h
+  s_7cb5a859b1ec84::t_046e0556fae119 138
+lv_conf_template.h
+  s_7cb5a859b1ec84::t_046e0556fae119 742-750
+src/font/font_vec/lv_font_vec.c
+  s_7cb5a859b1ec84::t_046e0556fae119 1-2118
+scripts/built_in_font/ttf-to-vecfont.py
+  s_7cb5a859b1ec84::t_046e0556fae119 1-379
+src/font/font_vec/lv_font_vec_montserrat.c
+  s_7cb5a859b1ec84::t_046e0556fae119 1-2631
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "85f031804b9b19ab171c971500703df3dd933b51",
+  "prompts": {},
+  "sessions": {
+    "s_7cb5a859b1ec84": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c3b4f29-3b93-4c4e-a197-38aa695ededb",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
