@@ -1,0 +1,42 @@
+demos/cellphone/lv_demo_cellphone_contacts.c
+  s_a4aa75f409acbc::t_3f5c0ad78e52c3 33-37
+  s_a4aa75f409acbc::t_dd9ff89ec7033c 39-40
+demos/cellphone/lv_demo_cellphone_home.c
+  s_a4aa75f409acbc::t_757adb696c85f6 123-125,127-128
+demos/cellphone/lv_demo_cellphone_anim.c
+  s_a4aa75f409acbc::t_bb2a468df06b6f 131-133,136,139
+demos/cellphone/lv_demo_cellphone_common.h
+  s_a4aa75f409acbc::t_a9bc4e0476b2c6 304-309
+demos/cellphone/lv_demo_cellphone.c
+  s_a4aa75f409acbc::t_a1eed3e8140404 538-553
+demos/stress/lv_demo_stress.c
+  s_a4aa75f409acbc::t_2b2d3650a2fe10 193
+demos/cellphone/lv_demo_cellphone_sms.c
+  s_a4aa75f409acbc::t_a1c1d2cd539a38 158-159
+  s_a4aa75f409acbc::t_255e44776ef4f0 55
+  s_a4aa75f409acbc::t_7ab3862c9a737b 333-371
+demos/cellphone/lv_demo_cellphone_camera.c
+  s_a4aa75f409acbc::t_2707f974feaa6f 25
+  s_a4aa75f409acbc::t_9d88f62b42464d 79-82
+  s_a4aa75f409acbc::t_0d2b3337739c29 127-131,134-136
+  s_a4aa75f409acbc::t_5d4476c1ba3f7b 212-274
+  s_a4aa75f409acbc::t_d99cd9cf457d73 112
+demos/cellphone/lv_demo_cellphone_lock.c
+  s_a4aa75f409acbc::t_9bbdc0003fe7de 156,158-159,161-164
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "c95882c0b469bcf320b588047a7546d72348ac31",
+  "prompts": {},
+  "sessions": {
+    "s_a4aa75f409acbc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb9e8b32-6d2b-4fe9-ac1e-7b6ae57b278d",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
