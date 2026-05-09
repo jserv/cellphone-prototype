@@ -1,0 +1,48 @@
+demos/cellphone/lv_demo_cellphone_home.c
+  s_80dd85dbfa53bb::t_57611a8d59c2f3 191
+  s_80dd85dbfa53bb::t_91fd3ea86e8291 39-41
+  s_80dd85dbfa53bb::t_9a7ca8bcf7e182 235-238,241-251
+  s_80dd85dbfa53bb::t_14950ee87351e4 225,254-286,288-291,294-300,302-321,324,326-345,347-394,396-419,422-427,434-456
+  s_80dd85dbfa53bb::t_bda4a1a046a874 221,227,240,420-421
+  s_80dd85dbfa53bb::t_daa37826c88274 24-29
+  s_80dd85dbfa53bb::t_a587144895ee9c 428-433
+  s_80dd85dbfa53bb::t_db8ed92521faa9 195-198
+demos/cellphone/lv_demo_cellphone_settings.c
+  s_80dd85dbfa53bb::t_ea1c7caeb760a2 34
+  s_80dd85dbfa53bb::t_c1ae7b381b9bc2 375-380
+  s_80dd85dbfa53bb::t_e6dff8c3069168 432-436
+demos/cellphone/lv_demo_cellphone.c
+  s_80dd85dbfa53bb::t_d7c4baeab987fb 237-242,244-245
+  s_80dd85dbfa53bb::t_b8df165a19a910 629-637
+  s_80dd85dbfa53bb::t_53de46328fe063 334-349,353-354
+  s_80dd85dbfa53bb::t_6de30d0440ed8b 332-333
+demos/cellphone/README.md
+  s_80dd85dbfa53bb::t_a5f1a26d0f7e5e 123-130
+demos/cellphone/lv_demo_cellphone_camera.c
+  s_80dd85dbfa53bb::t_acaeb3804975ee 130,133
+demos/cellphone/lv_demo_cellphone_home.h
+  s_80dd85dbfa53bb::t_b9fe3c5646e2f2 23-34
+demos/cellphone/lv_demo_cellphone_lock.c
+  s_80dd85dbfa53bb::t_c1f8c1ff92cd92 70-85
+demos/cellphone/lv_demo_cellphone_common.h
+  s_80dd85dbfa53bb::t_22d31dd4acd73d 305-312
+  s_80dd85dbfa53bb::t_f9c307456b3966 181-189
+  s_80dd85dbfa53bb::t_07f291ca4684f8 167-173
+  s_80dd85dbfa53bb::t_a69eeb11d487a1 358-367,370-375
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a38266df61dae37baf107ffaba95b26f7e741db4",
+  "prompts": {},
+  "sessions": {
+    "s_80dd85dbfa53bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "67da456c-c448-40b3-a777-4167ed33decf",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}
