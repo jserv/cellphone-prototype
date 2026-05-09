@@ -1,0 +1,37 @@
+demos/cellphone/lv_demo_cellphone.c
+  ai_agent 49,57-65,158-167,192-233,246-258,421-428
+demos/cellphone/lv_demo_cellphone_navbar.c
+  ai_agent 32-34
+demos/cellphone/lv_demo_cellphone_softkbd.c
+  ai_agent 52-55,57
+demos/cellphone/config/lv_conf.h
+  s_66bff774682d8a::t_9343a64b6edc56 23
+src/font/font_vec/lv_font_vec_cellphone_icons.c
+  ai_agent 1-245
+demos/cellphone/lv_demo_cellphone_settings.c
+  ai_agent 271,315-316,322
+demos/cellphone/lv_demo_cellphone_common.h
+  ai_agent 107
+demos/cellphone/lv_demo_cellphone_sms.c
+  ai_agent 86
+demos/cellphone/lv_demo_cellphone_music.c
+  ai_agent 250
+src/font/font_vec/lv_font_vec_montserrat.c
+  ai_agent 1-2,10-423,435-446,448
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "68812271fdd15da0b6dc3e69dec687a77b69270e",
+  "prompts": {},
+  "sessions": {
+    "s_66bff774682d8a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63433578-1b82-448b-b697-dda3ffd57745",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
