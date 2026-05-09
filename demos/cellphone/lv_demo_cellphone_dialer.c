@@ -12,8 +12,12 @@
  *      DEFINES
  *********************/
 #define DIALER_NUM_MAX      20
-#define DIALER_KEYPAD_ROWS  4
-#define DIALER_KEYPAD_COLS  3
+
+#define CELLPHONE_DIALER_KEY_LIST(X) \
+    X("1", 0, 0) X("2", 1, 0) X("3", 2, 0) \
+    X("4", 0, 1) X("5", 1, 1) X("6", 2, 1) \
+    X("7", 0, 2) X("8", 1, 2) X("9", 2, 2) \
+    X("*", 0, 3) X("0", 1, 3) X("#", 2, 3)
 
 /**********************
  *  STATIC PROTOTYPES
@@ -51,13 +55,6 @@ static const char * s_call_number;      /* points into compiled-in data or s_num
 static uint32_t    s_call_seconds;
 static lv_obj_t  * s_time_label;
 static lv_timer_t * s_call_timer;
-
-static const char * const s_keypad_labels[DIALER_KEYPAD_ROWS][DIALER_KEYPAD_COLS] = {
-    { "1", "2", "3" },
-    { "4", "5", "6" },
-    { "7", "8", "9" },
-    { "*", "0", "#" },
-};
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -114,11 +111,9 @@ lv_obj_t * cellphone_dialer_create(lv_obj_t * parent)
     lv_obj_set_style_pad_column(keypad, 3, 0);
     lv_obj_clear_flag(keypad, LV_OBJ_FLAG_SCROLLABLE);
 
-    for(int32_t row = 0; row < DIALER_KEYPAD_ROWS; row++) {
-        for(int32_t col = 0; col < DIALER_KEYPAD_COLS; col++) {
-            dialer_key_create(keypad, s_keypad_labels[row][col], col, row);
-        }
-    }
+#define X(text, col, row) dialer_key_create(keypad, text, col, row);
+    CELLPHONE_DIALER_KEY_LIST(X)
+#undef X
 
     /* --- bottom row: delete + call --- */
     lv_obj_t * bottom = cellphone_obj_bare(parent);

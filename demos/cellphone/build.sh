@@ -8,7 +8,7 @@
 #
 # === Usage: ===
 #   demos/cellphone/build.sh              # build lib + demo binary
-#   demos/cellphone/build.sh test         # also build + run the test (113 checks)
+#   demos/cellphone/build.sh test         # also build + run the test (172 checks)
 #   demos/cellphone/build.sh report       # test build with heap-report diagnostic
 #   demos/cellphone/build.sh demo         # build lib + demo, then run it
 #   demos/cellphone/build.sh clean        # remove build/

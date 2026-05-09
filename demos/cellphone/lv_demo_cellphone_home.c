@@ -21,19 +21,24 @@
 #define ICON_PLATE_SIZE      (CELLPHONE_ICON_SIZE + 12)
 #define ICON_PLATE_Y         0
 #define ICON_LABEL_Y         (ICON_PLATE_SIZE + 6)
+/* Modern squircle look: ~27% of plate side; iOS uses ~22%, Material You
+ * uses ~30%. 14 / 52 = 0.269 sits between them. */
+#define ICON_PLATE_RADIUS    14
+/* Gradient mix toward black at the bottom of the plate -- 14% is enough
+ * to read as depth without looking 2010s skeuomorphic. */
+#define ICON_PLATE_GRAD_MIX  LV_OPA_20
 
 /**********************
  *  STATIC PROTOTYPES
  **********************/
 static void icon_event_cb(lv_event_t * e);
 static void page_changed_cb(lv_event_t * e);
-static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
-                              const void * icon_src,
-                              cellphone_screen_create_fn fn);
-static void create_camera_icon(lv_obj_t * parent, lv_color_t accent);
-static void create_arcade_icon(lv_obj_t * parent, const char * label_text);
-static void arcade_icon_draw_cb(lv_event_t * e);
+static lv_obj_t * create_icon(lv_obj_t * parent, const cellphone_app_entry_t * app);
+static void icon_plate_draw_cb(lv_event_t * e);
 static void indicator_set_active(uint32_t active_idx, bool animated);
+static void glyph_draw_block(lv_layer_t * layer, lv_draw_rect_dsc_t * dsc,
+                             int32_t x1, int32_t y1, int32_t x2, int32_t y2,
+                             lv_color_t color, int32_t radius);
 
 /**********************
  *  STATIC VARIABLES
@@ -112,9 +117,7 @@ lv_obj_t * cellphone_home_create(lv_obj_t * parent)
         for(int r = 0; r < CELLPHONE_GRID_ROWS && app_idx < app_count; r++) {
             for(int c = 0; c < CELLPHONE_GRID_COLS && app_idx < app_count; c++) {
                 lv_obj_t * icon = create_icon(tile,
-                                              apps[app_idx].name,
-                                              apps[app_idx].icon,
-                                              apps[app_idx].create);
+                                              &apps[app_idx]);
                 lv_obj_set_grid_cell(icon,
                                      LV_GRID_ALIGN_CENTER, c, 1,
                                      LV_GRID_ALIGN_CENTER, r, 1);
@@ -183,48 +186,19 @@ void cellphone_home_refresh_state_restore(uint32_t state)
  *   STATIC FUNCTIONS
  **********************/
 
-static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
-                              const void * icon_src,
-                              cellphone_screen_create_fn fn)
+static lv_obj_t * create_icon(lv_obj_t * parent, const cellphone_app_entry_t * app)
 {
-    lv_obj_t * cont = cellphone_obj_bare(parent);
+    lv_obj_t * cont = cellphone_obj_transparent(parent);
     lv_obj_set_size(cont, ICON_LABEL_W + 12, CELLPHONE_ICON_SIZE + CELLPHONE_ICON_LABEL_H + 18);
-    lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
-    /* Icon: either a real image or a colored placeholder square */
-    if(icon_src) {
-        lv_obj_t * img = lv_image_create(cont);
-        lv_image_set_src(img, icon_src);
-        lv_obj_align(img, LV_ALIGN_TOP_MID, 0, ICON_PLATE_Y);
-    }
-    else {
-        if(lv_strcmp(label_text, "Camera") == 0 ||
-           lv_strcmp(label_text, "Snake") == 0 ||
-           lv_strcmp(label_text, "Pong") == 0 ||
-           lv_strcmp(label_text, "Tetris") == 0) {
-            if(lv_strcmp(label_text, "Camera") == 0) {
-                lv_obj_t * icon_card = cellphone_obj_bare(cont);
-                lv_obj_set_size(icon_card, ICON_PLATE_SIZE, ICON_PLATE_SIZE);
-                lv_obj_align(icon_card, LV_ALIGN_TOP_MID, 0, ICON_PLATE_Y);
-                lv_obj_clear_flag(icon_card, LV_OBJ_FLAG_SCROLLABLE);
-                lv_obj_remove_flag(icon_card, LV_OBJ_FLAG_CLICKABLE);
-                create_camera_icon(icon_card, lv_color_make(0x8c, 0x67, 0x52));
-            }
-            else {
-                create_arcade_icon(cont, label_text);
-            }
-        }
-        else {
-            char buf[2] = { label_text[0], '\0' };
-            lv_obj_t * placeholder = cellphone_label(cont, buf,
-                                                     CELLPHONE_FONT_HEADING, CELLPHONE_COLOR_TEXT);
-            lv_obj_align(placeholder, LV_ALIGN_TOP_MID, 0, 10);
-        }
-    }
+    /* All icons render through the procedural plate -- one
+     * LV_EVENT_DRAW_MAIN per icon, zero child objects, consistent
+     * modern look across the grid. */
+    lv_obj_add_event_cb(cont, icon_plate_draw_cb, LV_EVENT_DRAW_MAIN, (void *)app);
 
     /* Label below icon */
-    lv_obj_t * lbl = cellphone_label(cont, label_text,
+    lv_obj_t * lbl = cellphone_label(cont, app->name,
                                      CELLPHONE_FONT_SM, CELLPHONE_COLOR_TEXT);
     lv_obj_set_width(lbl, ICON_LABEL_W);
     lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
@@ -233,174 +207,253 @@ static lv_obj_t * create_icon(lv_obj_t * parent, const char * label_text,
 
     /* One callback handles both click and long-press, avoiding a second
      * event descriptor per icon. */
-    lv_obj_add_event_cb(cont, icon_event_cb, LV_EVENT_ALL, (void *)fn);
+    lv_obj_add_event_cb(cont, icon_event_cb, LV_EVENT_ALL, (void *)app->create);
 
     return cont;
 }
 
-static void create_camera_icon(lv_obj_t * parent, lv_color_t accent)
-{
-    lv_obj_t * body = cellphone_obj_fill(parent, accent);
-    lv_obj_set_size(body, 30, 20);
-    lv_obj_center(body);
-    lv_obj_set_style_radius(body, 6, 0);
-    lv_obj_remove_flag(body, LV_OBJ_FLAG_CLICKABLE);
-
-    lv_obj_t * top = cellphone_obj_fill(body, lv_color_mix(accent, lv_color_white(), LV_OPA_20));
-    lv_obj_set_size(top, 12, 5);
-    lv_obj_align(top, LV_ALIGN_TOP_LEFT, 4, -3);
-    lv_obj_set_style_radius(top, 3, 0);
-    lv_obj_remove_flag(top, LV_OBJ_FLAG_CLICKABLE);
-
-    lv_obj_t * lens_outer = cellphone_obj_fill(body, lv_color_hex(0x263238));
-    lv_obj_set_size(lens_outer, 12, 12);
-    lv_obj_center(lens_outer);
-    lv_obj_set_style_radius(lens_outer, LV_RADIUS_CIRCLE, 0);
-    lv_obj_remove_flag(lens_outer, LV_OBJ_FLAG_CLICKABLE);
-
-    lv_obj_t * lens_inner = cellphone_obj_fill(lens_outer, lv_color_hex(0x90caf9));
-    lv_obj_set_size(lens_inner, 6, 6);
-    lv_obj_center(lens_inner);
-    lv_obj_set_style_radius(lens_inner, LV_RADIUS_CIRCLE, 0);
-    lv_obj_remove_flag(lens_inner, LV_OBJ_FLAG_CLICKABLE);
-
-    lv_obj_t * flash = cellphone_obj_fill(body, lv_color_hex(0xfff59d));
-    lv_obj_set_size(flash, 4, 4);
-    lv_obj_align(flash, LV_ALIGN_RIGHT_MID, -4, 0);
-    lv_obj_set_style_radius(flash, LV_RADIUS_CIRCLE, 0);
-    lv_obj_remove_flag(flash, LV_OBJ_FLAG_CLICKABLE);
-}
-
-static void create_arcade_icon(lv_obj_t * parent, const char * label_text)
-{
-    lv_obj_add_event_cb(parent, arcade_icon_draw_cb, LV_EVENT_DRAW_MAIN, (void *)(uintptr_t)(label_text[0]));
-}
-
-static void arcade_icon_draw_cb(lv_event_t * e)
+static void icon_plate_draw_cb(lv_event_t * e)
 {
     lv_obj_t * obj = lv_event_get_target(e);
     lv_layer_t * layer = lv_event_get_layer(e);
-    uintptr_t kind = (uintptr_t)lv_event_get_user_data(e);
-    lv_color_t accent = kind == 'S' ? lv_color_make(0x3f, 0x9b, 0x64)
-                        : kind == 'P' ? lv_color_make(0x3f, 0x78, 0xd6)
-                        : lv_color_make(0xe0, 0x78, 0x2c);
-    lv_area_t c;
-    lv_draw_rect_dsc_t rect;
-    lv_draw_line_dsc_t line;
-    lv_area_t a;
+    const cellphone_app_entry_t * app = lv_event_get_user_data(e);
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_color_t accent;
     lv_area_t plate;
-    lv_color_t glyph = lv_color_white();
+    lv_area_t coords;
 
-    lv_obj_get_coords(obj, &c);
-    lv_draw_rect_dsc_init(&rect);
-    lv_draw_line_dsc_init(&line);
-    rect.bg_opa = LV_OPA_COVER;
-    line.color = glyph;
-    line.width = 4;
-    line.round_start = 1;
-    line.round_end = 1;
-    plate.x1 = c.x1 + (lv_obj_get_width(obj) - ICON_PLATE_SIZE) / 2 + 6;
-    plate.y1 = c.y1 + ICON_PLATE_Y + 6;
-    plate.x2 = plate.x1 + CELLPHONE_ICON_SIZE - 1;
-    plate.y2 = plate.y1 + CELLPHONE_ICON_SIZE - 1;
-    rect.bg_color = accent;
-    rect.radius = 9;
-    lv_draw_rect(layer, &rect, &plate);
+    if(app == NULL) return;
 
-    rect.bg_color = lv_color_mix(accent, lv_color_white(), LV_OPA_20);
-    rect.radius = 8;
-    a.x1 = plate.x1 + 2;
-    a.y1 = plate.y1 + 2;
-    a.x2 = plate.x2 - 2;
-    a.y2 = plate.y1 + 8;
-    lv_draw_rect(layer, &rect, &a);
+    accent = lv_color_hex(app->icon_color_hex);
+    lv_obj_get_coords(obj, &coords);
 
-    if(kind == 'S') {
-        lv_point_precise_t pts[] = {
-            { plate.x1 + 8,  plate.y1 + 24 }, { plate.x1 + 15, plate.y1 + 24 },
-            { plate.x1 + 15, plate.y1 + 17 }, { plate.x1 + 23, plate.y1 + 17 },
-            { plate.x1 + 23, plate.y1 + 27 }, { plate.x1 + 30, plate.y1 + 27 }
-        };
-        line.points = pts;
-        line.point_cnt = (int32_t)(sizeof(pts) / sizeof(pts[0]));
-        lv_draw_line(layer, &line);
+    plate.x1 = coords.x1 + (lv_obj_get_width(obj) - ICON_PLATE_SIZE) / 2;
+    plate.y1 = coords.y1 + ICON_PLATE_Y;
+    plate.x2 = plate.x1 + ICON_PLATE_SIZE - 1;
+    plate.y2 = plate.y1 + ICON_PLATE_SIZE - 1;
 
-        rect.bg_color = glyph;
-        rect.radius = LV_RADIUS_CIRCLE;
-        a.x1 = plate.x1 + 27;
-        a.y1 = plate.y1 + 20;
-        a.x2 = plate.x1 + 34;
-        a.y2 = plate.y1 + 27;
-        lv_draw_rect(layer, &rect, &a);
+    /* Modern squircle plate: solid accent at the top transitioning to a
+     * slightly darkened accent at the bottom, no gloss strip. The
+     * gradient is a single 2-stop linear so it composes with the MCU
+     * profile's reduced gradient-stop budget. */
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_color = accent;
+    rect_dsc.bg_grad.dir = LV_GRAD_DIR_VER;
+    rect_dsc.bg_grad.stops_count = 2;
+    rect_dsc.bg_grad.stops[0].color = accent;
+    rect_dsc.bg_grad.stops[0].opa = LV_OPA_COVER;
+    rect_dsc.bg_grad.stops[0].frac = 0;
+    rect_dsc.bg_grad.stops[1].color = lv_color_mix(lv_color_black(), accent,
+                                                   ICON_PLATE_GRAD_MIX);
+    rect_dsc.bg_grad.stops[1].opa = LV_OPA_COVER;
+    rect_dsc.bg_grad.stops[1].frac = 255;
+    rect_dsc.bg_opa = LV_OPA_COVER;
+    rect_dsc.radius = ICON_PLATE_RADIUS;
+    lv_draw_rect(layer, &rect_dsc, &plate);
 
-        rect.bg_color = accent;
-        a.x1 = plate.x1 + 30;
-        a.y1 = plate.y1 + 22;
-        a.x2 = plate.x1 + 31;
-        a.y2 = plate.y1 + 23;
-        lv_draw_rect(layer, &rect, &a);
+    /* Glyph: either a bundled FA5 symbol drawn as text, or a custom
+     * procedural silhouette. Exactly one of icon_text / glyph_draw is
+     * set per registry entry. */
+    if(app->icon_text) {
+        lv_draw_label_dsc_t label_dsc;
+        lv_point_t text_size;
+        lv_area_t glyph_area;
 
-        rect.bg_color = lv_color_hex(0xe53935);
-        a.x1 = plate.x1 + 6;
-        a.y1 = plate.y1 + 10;
-        a.x2 = plate.x1 + 11;
-        a.y2 = plate.y1 + 15;
-        lv_draw_rect(layer, &rect, &a);
+        lv_draw_label_dsc_init(&label_dsc);
+        label_dsc.color = lv_color_white();
+        label_dsc.opa = LV_OPA_COVER;
+        label_dsc.font = CELLPHONE_FONT_LARGE;
+        label_dsc.text = app->icon_text;
+
+        lv_text_get_size(&text_size, app->icon_text, label_dsc.font,
+                         0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+        glyph_area.x1 = plate.x1 + (lv_area_get_width(&plate) - text_size.x) / 2;
+        glyph_area.y1 = plate.y1 + (lv_area_get_height(&plate) - text_size.y) / 2;
+        glyph_area.x2 = glyph_area.x1 + text_size.x - 1;
+        glyph_area.y2 = glyph_area.y1 + text_size.y - 1;
+        lv_draw_label(layer, &label_dsc, &glyph_area);
     }
-    else if(kind == 'P') {
-        rect.bg_color = glyph;
-        rect.radius = 3;
-        a.x1 = plate.x1 + 6;
-        a.y1 = plate.y1 + 11;
-        a.x2 = plate.x1 + 10;
-        a.y2 = plate.y1 + 30;
-        lv_draw_rect(layer, &rect, &a);
-        a.x1 = plate.x2 - 9;
-        a.y1 = plate.y1 + 11;
-        a.x2 = plate.x2 - 5;
-        a.y2 = plate.y1 + 30;
-        lv_draw_rect(layer, &rect, &a);
-
-        rect.bg_color = lv_color_hex(0x4dd0e1);
-        rect.radius = LV_RADIUS_CIRCLE;
-        a.x1 = plate.x1 + 17;
-        a.y1 = plate.y1 + 16;
-        a.x2 = plate.x1 + 23;
-        a.y2 = plate.y1 + 22;
-        lv_draw_rect(layer, &rect, &a);
-
-        rect.bg_color = lv_color_mix(glyph, accent, LV_OPA_40);
-        rect.radius = 1;
-        a.x1 = plate.x1 + 19;
-        a.y1 = plate.y1 + 8;
-        a.x2 = plate.x1 + 20;
-        a.y2 = plate.y1 + 13;
-        lv_draw_rect(layer, &rect, &a);
-        a.y1 = plate.y1 + 25;
-        a.y2 = plate.y1 + 30;
-        lv_draw_rect(layer, &rect, &a);
+    else if(app->glyph_draw) {
+        app->glyph_draw(layer, &plate, accent);
     }
-    else {
-        static const struct {
-            int16_t x;
-            int16_t y;
-            uint8_t color_id;
-        } blocks[] = {
-            { 8, 9,  0 }, { 14, 9, 0 }, { 20, 9, 0 }, { 26, 9, 0 },
-            { 14, 16, 1 }, { 20, 16, 1 }, { 14, 23, 2 }, { 20, 23, 2 },
-        };
+}
 
-        rect.radius = 2;
-        for(uint32_t i = 0; i < sizeof(blocks) / sizeof(blocks[0]); i++) {
-            if(blocks[i].color_id == 0) rect.bg_color = glyph;
-            else if(blocks[i].color_id == 1) rect.bg_color = lv_color_make(0xff, 0xd5, 0x4f);
-            else rect.bg_color = lv_color_make(0x81, 0xd4, 0xfa);
-            a.x1 = plate.x1 + blocks[i].x;
-            a.y1 = plate.y1 + blocks[i].y + 2;
-            a.x2 = a.x1 + 5;
-            a.y2 = a.y1 + 5;
-            lv_draw_rect(layer, &rect, &a);
+/* Stamp a small color block inside the plate. The plate-glyph drawers
+ * call this dozens of times each with only color/coords/radius
+ * varying; centralizing keeps the per-drawer code dense. */
+static void glyph_draw_block(lv_layer_t * layer, lv_draw_rect_dsc_t * dsc,
+                             int32_t x1, int32_t y1, int32_t x2, int32_t y2,
+                             lv_color_t color, int32_t radius)
+{
+    lv_area_t a = { .x1 = x1, .y1 = y1, .x2 = x2, .y2 = y2 };
+    dsc->bg_color = color;
+    dsc->radius = radius;
+    lv_draw_rect(layer, dsc, &a);
+}
+
+/* All glyph drawers share the same convention:
+ *   - cx, cy = plate center; px1/py1 = plate top-left corner.
+ *   - Glyph silhouette stays inside a 32 px box centered on the plate.
+ *   - White is the primary stroke; `accent` is mixed in only for inner
+ *     shading so the icon always reads on its own colored plate. */
+
+void cellphone_glyph_messages(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+    lv_color_t shade = lv_color_mix(lv_color_black(), accent, LV_OPA_60);
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    /* Speech bubble body with a tail in the bottom-left corner. */
+    glyph_draw_block(layer, &r, cx - 14, cy - 11, cx + 14, cy + 7, white, 4);
+    /* Tail: small triangle approximation via two stacked rounded rects. */
+    glyph_draw_block(layer, &r, cx - 12, cy + 5, cx - 6, cy + 11, white, 2);
+    glyph_draw_block(layer, &r, cx - 11, cy + 8, cx - 8, cy + 12, white, 1);
+
+    /* Three reading dots so the bubble reads as a chat thread, not a
+     * blank card. Drawn in shade for legibility on the white body. */
+    glyph_draw_block(layer, &r, cx - 7, cy - 3, cx - 4, cy, shade, LV_RADIUS_CIRCLE);
+    glyph_draw_block(layer, &r, cx - 1, cy - 3, cx + 2, cy, shade, LV_RADIUS_CIRCLE);
+    glyph_draw_block(layer, &r, cx + 5, cy - 3, cx + 8, cy, shade, LV_RADIUS_CIRCLE);
+}
+
+void cellphone_glyph_calculator(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+    lv_color_t key = lv_color_mix(lv_color_black(), accent, LV_OPA_70);
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    /* Calculator body. */
+    glyph_draw_block(layer, &r, cx - 13, cy - 14, cx + 13, cy + 14, white, 4);
+    /* Display strip across the top. */
+    glyph_draw_block(layer, &r, cx - 10, cy - 11, cx + 10, cy - 6, key, 1);
+    /* 3 x 3 keypad grid (small dark squares spaced 6 px apart). */
+    for(int row = 0; row < 3; row++) {
+        for(int col = 0; col < 3; col++) {
+            int32_t x = cx - 9 + col * 7;
+            int32_t y = cy - 2 + row * 6;
+            glyph_draw_block(layer, &r, x, y, x + 4, y + 3, key, 1);
         }
+    }
+}
+
+void cellphone_glyph_camera(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+    lv_color_t lens_dk = lv_color_mix(lv_color_black(), accent, LV_OPA_70);
+    lv_color_t glass = lv_color_mix(white, accent, LV_OPA_60);
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    /* Viewfinder bump (sits on top of the body). */
+    glyph_draw_block(layer, &r, cx - 5, cy - 12, cx + 5, cy - 8, white, 2);
+    /* Body. */
+    glyph_draw_block(layer, &r, cx - 14, cy - 8, cx + 14, cy + 10, white, 4);
+    /* Lens outer ring + inner glass + flash dot. */
+    glyph_draw_block(layer, &r, cx - 7, cy - 4, cx + 7, cy + 8, lens_dk, LV_RADIUS_CIRCLE);
+    glyph_draw_block(layer, &r, cx - 4, cy - 1, cx + 4, cy + 5, glass, LV_RADIUS_CIRCLE);
+    glyph_draw_block(layer, &r, cx + 9, cy - 6, cx + 12, cy - 3, lens_dk, LV_RADIUS_CIRCLE);
+}
+
+void cellphone_glyph_snake(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+
+    /* Snake body: 5 stacked round segments forming a zigzag, head at
+     * the right. Each segment is a 6 px circle. */
+    static const struct {
+        int8_t dx;
+        int8_t dy;
+    } seg[] = {
+        { -12, 4 }, { -6, 4 }, { -6, -2 }, { 0, -2 }, { 0, 4 },
+        { 6, 4 }, { 12, 4 }, { 12, -2 },
+    };
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    for(uint32_t i = 0; i < sizeof(seg) / sizeof(seg[0]); i++) {
+        int32_t x = cx + seg[i].dx - 2;
+        int32_t y = cy + seg[i].dy - 2;
+        glyph_draw_block(layer, &r, x, y, x + 4, y + 4, white, LV_RADIUS_CIRCLE);
+    }
+    /* Apple: small accented dot above the head. */
+    glyph_draw_block(layer, &r, cx + 10, cy - 11, cx + 14, cy - 7,
+                     lv_color_hex(0xef4444), LV_RADIUS_CIRCLE);
+}
+
+void cellphone_glyph_pong(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+    lv_color_t net = lv_color_mix(white, accent, LV_OPA_50);
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    /* Two paddles flanking a centered ball. */
+    glyph_draw_block(layer, &r, cx - 14, cy - 9, cx - 11, cy + 9, white, 2);
+    glyph_draw_block(layer, &r, cx + 11, cy - 9, cx + 14, cy + 9, white, 2);
+    glyph_draw_block(layer, &r, cx - 2, cy - 2, cx + 2, cy + 2, white, LV_RADIUS_CIRCLE);
+    /* Center net stipple: 3 dashes top-to-bottom. */
+    for(int i = -10; i <= 10; i += 8) {
+        glyph_draw_block(layer, &r, cx - 1, cy + i, cx + 1, cy + i + 3, net, 1);
+    }
+}
+
+void cellphone_glyph_tetris(lv_layer_t * layer, const lv_area_t * plate, lv_color_t accent)
+{
+    int32_t cx = (plate->x1 + plate->x2) / 2;
+    int32_t cy = (plate->y1 + plate->y2) / 2;
+    lv_color_t white = lv_color_white();
+    /* Two accent tints so the falling-piece silhouette has visual
+     * weight without leaving the icon's color identity. The warm tint
+     * sits ~50% white so it stays readable on the bottom of the plate
+     * (which the gradient darkens by ICON_PLATE_GRAD_MIX); a softer
+     * mix vanishes on red/pink palettes. */
+    lv_color_t warm = lv_color_mix(white, accent, LV_OPA_50);
+    lv_color_t cool = lv_color_mix(white, accent, LV_OPA_70);
+
+    lv_draw_rect_dsc_t r;
+    lv_draw_rect_dsc_init(&r);
+    r.bg_opa = LV_OPA_COVER;
+
+    /* Classic L-tetromino + a 2x1 floating piece. Each block is 6x6. */
+    static const struct {
+        int8_t dx;
+        int8_t dy;
+        uint8_t tone; /* 0=white, 1=warm, 2=cool */
+    } blocks[] = {
+        { -10, -2, 0 }, { -4, -2, 0 }, { 2, -2, 0 }, { 8, -2, 0 },
+        { -4, 4, 1 }, { 2, 4, 1 },
+        { -4, 10, 2 }, { 2, 10, 2 },
+    };
+
+    const lv_color_t palette[3] = { white, warm, cool };
+
+    for(uint32_t i = 0; i < sizeof(blocks) / sizeof(blocks[0]); i++) {
+        int32_t x = cx + blocks[i].dx;
+        int32_t y = cy + blocks[i].dy;
+        glyph_draw_block(layer, &r, x, y, x + 5, y + 5,
+                         palette[blocks[i].tone], 1);
     }
 }
 

@@ -120,23 +120,14 @@ All demo data (12 contacts, 4 SMS threads, 15 call log entries,
 
 ## Assets
 
-Source images live in `assets/png/`. Generated LVGL C arrays live in `assets/generated/`
-(scaled to 40x40 RGB565A8). RGB565A8 stores RGB in two bytes plus an
-8-bit alpha plane, matching `LV_COLOR_DEPTH 16` displays exactly while
-saving 1.6 KiB per icon (12.5 KiB total) over ARGB8888.
-
-To regenerate after modifying a source PNG (pre-scale to 40x40 first):
-
-```bash
-# Scale the source PNG (ImageMagick, Pillow, or any tool)
-convert demos/cellphone/assets/png/phone.png -resize 40x40 /tmp/phone_40.png
-
-# Convert to LVGL C array using the built-in converter
-python3 scripts/LVGLImage.py --ofmt C --cf RGB565A8 \
-    --name img_icon_phone \
-    -o demos/cellphone/assets/generated \
-    /tmp/phone_40.png
-```
+The demo ships no static image assets. Home-screen icons are rendered
+procedurally each paint tick: a squircle plate with a 2-stop gradient,
+overlaid with either a bundled FA5 glyph (Phone, Contacts, Music,
+Photos, Settings, Call Log) or a hand-tuned silhouette drawn via
+`lv_draw_rect` primitives (Messages, Calculator, Camera, Snake, Pong,
+Tetris). Status-bar and nav-bar chrome use the same vec-font / draw-
+primitive path. This keeps the binary asset-free and lets the icon
+palette swap with the active theme without re-encoding bitmaps.
 
 ## Configuration
 
@@ -248,7 +239,7 @@ per-font L2 cache budgets, and the L2 hit-rate band. Run it via:
 demos/cellphone/build.sh test
 ```
 
-113 checks cover boot, the lock-screen slide-to-unlock gesture (under-
+172 checks cover boot, the lock-screen slide-to-unlock gesture (under-
 threshold reset and full-slide pop), each app, the dialer call flow
 (keypad accumulation, in-call screen push, 1 s timer flip, end-call
 pop), the calculator arithmetic path (digits, +/=, divide-by-zero,

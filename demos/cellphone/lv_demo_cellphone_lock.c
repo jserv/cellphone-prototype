@@ -14,6 +14,7 @@
  **********************/
 static void slider_event_cb(lv_event_t * e);
 static void slider_reset_anim_cb(void * var, int32_t value);
+static void hint_text_opa_cb(void * var, int32_t value);
 static void lock_clock_timer_cb(lv_timer_t * timer);
 static void lock_delete_cb(lv_event_t * e);
 static void shutter_done_cb(lv_anim_t * a);
@@ -61,28 +62,27 @@ lv_obj_t * cellphone_lock_create(lv_obj_t * parent)
     /* Clean up timer when lock screen is destroyed */
     lv_obj_add_event_cb(parent, lock_delete_cb, LV_EVENT_DELETE, NULL);
 
-    /* "Slide to unlock" hint with sweep highlight */
-    lv_obj_t * hint_cont = cellphone_obj_bare(parent);
-    lv_obj_set_size(hint_cont, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_align(hint_cont, LV_ALIGN_BOTTOM_MID, 0, -50);
-    lv_obj_clear_flag(hint_cont, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_clip_corner(hint_cont, true, 0);
-    lv_obj_add_flag(hint_cont, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-
-    lv_obj_t * hint_label = cellphone_label(hint_cont, "Slide to unlock",
+    lv_obj_t * hint_label = cellphone_label(parent, "Slide to unlock",
                                             CELLPHONE_FONT_SM, lv_color_white());
-    lv_obj_set_style_text_opa(hint_label, LV_OPA_50, 0);
+    lv_obj_align(hint_label, LV_ALIGN_BOTTOM_MID, 0, -50);
+    lv_obj_set_style_text_opa(hint_label, LV_OPA_80, 0);
 
-    /* Small bright highlight bar that sweeps across the text */
-    lv_obj_t * highlight = cellphone_obj_bare(hint_cont);
-    lv_obj_set_size(highlight, 20, 14);
-    lv_obj_set_style_bg_color(highlight, lv_color_white(), 0);
-    lv_obj_set_style_bg_opa(highlight, LV_OPA_30, 0);
-    lv_obj_set_style_radius(highlight, 4, 0);
-
-    /* Sweep the highlight across the label width.
-     * Use a generous estimate since the label width isn't resolved yet. */
-    cellphone_anim_highlight_sweep(highlight, CELLPHONE_HOR_RES - 60);
+    /* Breathing affordance so the hint reads as "interactive" instead of
+     * static chrome. Built inline because cellphone_anim_run does not
+     * expose playback/repeat; the anim is bound to the label and is
+     * implicitly cancelled when the lock screen tears down its parent.
+     * Drive text_opa directly so the visible glyph alpha matches the
+     * intended pulse range instead of multiplying against a base text_opa. */
+    lv_anim_t hint_pulse;
+    lv_anim_init(&hint_pulse);
+    lv_anim_set_var(&hint_pulse, hint_label);
+    lv_anim_set_exec_cb(&hint_pulse, hint_text_opa_cb);
+    lv_anim_set_values(&hint_pulse, LV_OPA_30, LV_OPA_80);
+    lv_anim_set_duration(&hint_pulse, 900);
+    lv_anim_set_playback_duration(&hint_pulse, 900);
+    lv_anim_set_repeat_count(&hint_pulse, LV_ANIM_REPEAT_INFINITE);
+    lv_anim_set_path_cb(&hint_pulse, lv_anim_path_ease_in_out);
+    lv_anim_start(&hint_pulse);
 
     /* Slide-to-unlock slider */
     lv_obj_t * slider = lv_slider_create(parent);
@@ -118,6 +118,11 @@ lv_obj_t * cellphone_lock_create(lv_obj_t * parent)
 static void slider_reset_anim_cb(void * var, int32_t value)
 {
     lv_slider_set_value((lv_obj_t *)var, value, LV_ANIM_OFF);
+}
+
+static void hint_text_opa_cb(void * var, int32_t value)
+{
+    lv_obj_set_style_text_opa((lv_obj_t *)var, (lv_opa_t)value, 0);
 }
 
 static void slider_event_cb(lv_event_t * e)

@@ -16,36 +16,15 @@ extern "C" {
 #if LV_USE_DEMO_CELLPHONE
 
 /**
- * Start icon wobble animation on an object (edit mode).
- * Oscillates translate_x (-3..+3 px) and rotation (-20..+20 0.1deg units).
- * @param obj        Target object.
- * @param delay_ms   Stagger delay for organic feel.
- */
-void cellphone_anim_wobble_start(lv_obj_t * obj, uint32_t delay_ms);
-
-/**
- * Stop wobble animation on an object and reset transforms.
- */
-void cellphone_anim_wobble_stop(lv_obj_t * obj);
-
-/**
  * Scale-and-fade pickup effect (icon selected for dragging).
- * Scale 256->333 (1.0x->1.3x), opacity 255->128, duration 75ms.
+ * Kept intentionally subtle so edit mode feels crisp rather than noisy.
  */
 void cellphone_anim_pickup(lv_obj_t * obj);
 
 /**
- * Reverse pickup: scale 333->256, opacity 128->255, duration 75ms.
+ * Reverse of `cellphone_anim_pickup`.
  */
 void cellphone_anim_drop(lv_obj_t * obj);
-
-/**
- * Highlight sweep: animate a child object's X position across a label width.
- * Used for "slide to unlock" text highlight.
- * @param highlight  The highlight overlay object.
- * @param width      Total sweep distance in pixels.
- */
-void cellphone_anim_highlight_sweep(lv_obj_t * highlight, int32_t width);
 
 /* Shared single-line setter callbacks for animations across the demo.
  * Sharing folds away ~5 duplicated wrappers and lets `lv_anim_delete(obj, cb)`

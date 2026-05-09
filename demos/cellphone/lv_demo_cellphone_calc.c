@@ -17,6 +17,27 @@
 #define SCALE_DIGITS      6            /* decimal digits of precision */
 #define SCALE             1000000LL    /* 10^SCALE_DIGITS */
 
+#define CELLPHONE_CALC_KEY_LIST(X) \
+    X("C",             0, 0, 1) \
+    X("+/-",           1, 0, 1) \
+    X("%",             2, 0, 1) \
+    X("/",             3, 0, 1) \
+    X("7",             0, 1, 1) \
+    X("8",             1, 1, 1) \
+    X("9",             2, 1, 1) \
+    X(LV_SYMBOL_CLOSE, 3, 1, 1) \
+    X("4",             0, 2, 1) \
+    X("5",             1, 2, 1) \
+    X("6",             2, 2, 1) \
+    X("-",             3, 2, 1) \
+    X("1",             0, 3, 1) \
+    X("2",             1, 3, 1) \
+    X("3",             2, 3, 1) \
+    X("+",             3, 3, 1) \
+    X("0",             0, 4, 2) \
+    X(".",             2, 4, 1) \
+    X("=",             3, 4, 1)
+
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -86,25 +107,9 @@ lv_obj_t * cellphone_calc_create(lv_obj_t * parent)
     lv_obj_set_style_pad_column(keypad, 2, 0);
     lv_obj_clear_flag(keypad, LV_OBJ_FLAG_SCROLLABLE);
 
-    calc_key_create(keypad, "C",               0, 0, 1);
-    calc_key_create(keypad, "+/-",             1, 0, 1);
-    calc_key_create(keypad, "%",               2, 0, 1);
-    calc_key_create(keypad, "/",               3, 0, 1);
-    calc_key_create(keypad, "7",               0, 1, 1);
-    calc_key_create(keypad, "8",               1, 1, 1);
-    calc_key_create(keypad, "9",               2, 1, 1);
-    calc_key_create(keypad, LV_SYMBOL_CLOSE,   3, 1, 1);
-    calc_key_create(keypad, "4",               0, 2, 1);
-    calc_key_create(keypad, "5",               1, 2, 1);
-    calc_key_create(keypad, "6",               2, 2, 1);
-    calc_key_create(keypad, "-",               3, 2, 1);
-    calc_key_create(keypad, "1",               0, 3, 1);
-    calc_key_create(keypad, "2",               1, 3, 1);
-    calc_key_create(keypad, "3",               2, 3, 1);
-    calc_key_create(keypad, "+",               3, 3, 1);
-    calc_key_create(keypad, "0",               0, 4, 2);
-    calc_key_create(keypad, ".",               2, 4, 1);
-    calc_key_create(keypad, "=",               3, 4, 1);
+#define X(text, col, row, col_span) calc_key_create(keypad, text, col, row, col_span);
+    CELLPHONE_CALC_KEY_LIST(X)
+#undef X
 
     return parent;
 }

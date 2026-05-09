@@ -182,9 +182,9 @@ typedef struct {
     lv_anim_path_cb_t path_cb;
 } cellphone_motion_preset_t;
 
-extern const cellphone_motion_preset_t CELLPHONE_MOTION_STANDARD;   /* 300/250ms ease-in-out */
-extern const cellphone_motion_preset_t CELLPHONE_MOTION_EMPHASIZED; /* 400/300ms ease-in-out */
-extern const cellphone_motion_preset_t CELLPHONE_MOTION_QUICK;      /* 150/100ms ease-in-out */
+extern const cellphone_motion_preset_t CELLPHONE_MOTION_STANDARD;   /* 240/220ms ease-in-out */
+extern const cellphone_motion_preset_t CELLPHONE_MOTION_EMPHASIZED; /* 320/260ms ease-in-out */
+extern const cellphone_motion_preset_t CELLPHONE_MOTION_QUICK;      /* 120/110ms ease-out */
 
 
 /*********************
@@ -286,6 +286,15 @@ lv_obj_t * cellphone_obj_bare(lv_obj_t * parent);
 lv_obj_t * cellphone_obj_fill(lv_obj_t * parent, lv_color_t color);
 
 /**
+ * Bare `lv_obj` configured as a fully transparent surface with
+ * borders disabled and the SCROLLABLE flag cleared. Collapses the
+ * `bare + bg_opa=TRANSP + border=0 + clear SCROLLABLE` recipe that
+ * CLAUDE.md flags as a known wart -- use this helper instead of
+ * open-coding the four-call sequence on every screen.
+ */
+lv_obj_t * cellphone_obj_transparent(lv_obj_t * parent);
+
+/**
  * Paint an existing object's main-part background with `color` at full
  * opacity. Same recipe as `cellphone_obj_fill` but for objects that
  * already exist (screen `parent`, list buttons, the demo root, etc.) --
@@ -330,9 +339,24 @@ lv_obj_t * cellphone_label(lv_obj_t * parent, const char * text,
 /*********************
  * APP REGISTRY
  *********************/
+/**
+ * Procedural glyph drawer signature: paint a white silhouette inside
+ * `plate` (the modern squircle) using `accent` for any color-mixed
+ * highlights. Used for apps that don't have a bundled FA5 glyph --
+ * keeps the home grid alphabet-free.
+ */
+typedef void (*cellphone_app_glyph_draw_fn)(lv_layer_t * layer,
+                                            const lv_area_t * plate,
+                                            lv_color_t accent);
+
 typedef struct {
     const char * name;
-    const void * icon;   /* lv_image_dsc_t pointer, or NULL for placeholder */
+    /* Exactly one of icon_text / glyph_draw is set. icon_text is an
+     * FA5 symbol from the bundled cellphone-icons subset; glyph_draw is
+     * a procedural drawer for apps without a bundled glyph. */
+    const char * icon_text;
+    cellphone_app_glyph_draw_fn glyph_draw;
+    uint32_t icon_color_hex;
     cellphone_screen_create_fn create;
 } cellphone_app_entry_t;
 

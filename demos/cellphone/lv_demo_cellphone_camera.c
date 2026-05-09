@@ -127,12 +127,10 @@ lv_obj_t * cellphone_camera_create(lv_obj_t * parent)
     /* Focus indicator: 4 L-shaped corner brackets painted in a single
      * draw event so the scene doesn't allocate 4 extra lv_obj_t for what
      * is purely chrome. */
-    lv_obj_t * focus = cellphone_obj_bare(viewfinder);
+    lv_obj_t * focus = cellphone_obj_transparent(viewfinder);
     lv_obj_set_size(focus, 48, 48);
     lv_obj_center(focus);
-    lv_obj_set_style_bg_opa(focus, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(focus, 0, 0);
-    lv_obj_remove_flag(focus, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_remove_flag(focus, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(focus, focus_brackets_draw_cb, LV_EVENT_DRAW_MAIN, NULL);
 
     lv_obj_t * focus_dot = cellphone_obj_fill(focus, lv_color_hex(0xfff176));

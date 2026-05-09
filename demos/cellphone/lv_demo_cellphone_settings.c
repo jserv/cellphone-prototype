@@ -56,13 +56,18 @@ static lv_obj_t * s_about_page;
 static uint32_t s_current_page_id;
 static uint32_t s_restore_page_id;
 
+#define SETTINGS_PAGE_LIST(X) \
+    X(DISPLAY,   LV_SYMBOL_SETTINGS, "Display",   create_display_page) \
+    X(SOUND,     LV_SYMBOL_AUDIO,    "Sound",     create_sound_page) \
+    X(WALLPAPER, LV_SYMBOL_IMAGE,    "Wallpaper", create_wallpaper_page) \
+    X(TIME,      LV_SYMBOL_REFRESH,  "Time",      create_time_page) \
+    X(ABOUT,     LV_SYMBOL_LIST,     "About",     create_about_page)
+
 enum {
     SETTINGS_PAGE_ROOT = 0,
-    SETTINGS_PAGE_DISPLAY,
-    SETTINGS_PAGE_SOUND,
-    SETTINGS_PAGE_WALLPAPER,
-    SETTINGS_PAGE_TIME,
-    SETTINGS_PAGE_ABOUT,
+#define X(id, icon, title, create_fn) SETTINGS_PAGE_##id,
+    SETTINGS_PAGE_LIST(X)
+#undef X
 };
 
 /**********************
@@ -90,26 +95,24 @@ lv_obj_t * cellphone_settings_create(lv_obj_t * parent)
     /* Main page */
     lv_obj_t * main_page = lv_menu_page_create(menu, NULL);
 
-    /* Display item */
-    lv_obj_t * cont;
-    cont = create_menu_item(main_page, LV_SYMBOL_SETTINGS, "Display");
-    lv_menu_set_load_page_event(menu, cont, display_page);
+    {
+        lv_obj_t * const pages[] = {
+            NULL,
+            display_page,
+            sound_page,
+            wallpaper_page,
+            time_page,
+            about_page,
+        };
+        lv_obj_t * cont;
+        uint32_t page_idx = 1;
 
-    /* Sound item */
-    cont = create_menu_item(main_page, LV_SYMBOL_AUDIO, "Sound");
-    lv_menu_set_load_page_event(menu, cont, sound_page);
-
-    /* Wallpaper item */
-    cont = create_menu_item(main_page, LV_SYMBOL_IMAGE, "Wallpaper");
-    lv_menu_set_load_page_event(menu, cont, wallpaper_page);
-
-    /* Time item */
-    cont = create_menu_item(main_page, LV_SYMBOL_REFRESH, "Time");
-    lv_menu_set_load_page_event(menu, cont, time_page);
-
-    /* About item */
-    cont = create_menu_item(main_page, LV_SYMBOL_LIST, "About");
-    lv_menu_set_load_page_event(menu, cont, about_page);
+#define X(id, icon, title, create_fn) \
+    cont = create_menu_item(main_page, icon, title); \
+    lv_menu_set_load_page_event(menu, cont, pages[page_idx++]);
+        SETTINGS_PAGE_LIST(X)
+#undef X
+    }
 
     lv_menu_set_page(menu, main_page);
 
@@ -321,12 +324,25 @@ static void settings_menu_changed_cb(lv_event_t * e)
     lv_obj_t * menu = lv_event_get_target(e);
     lv_obj_t * page = lv_menu_get_cur_main_page(menu);
 
-    if(page == s_display_page) s_current_page_id = SETTINGS_PAGE_DISPLAY;
-    else if(page == s_sound_page) s_current_page_id = SETTINGS_PAGE_SOUND;
-    else if(page == s_wallpaper_page) s_current_page_id = SETTINGS_PAGE_WALLPAPER;
-    else if(page == s_time_page) s_current_page_id = SETTINGS_PAGE_TIME;
-    else if(page == s_about_page) s_current_page_id = SETTINGS_PAGE_ABOUT;
-    else s_current_page_id = SETTINGS_PAGE_ROOT;
+    struct page_map {
+        uint32_t id;
+        lv_obj_t * obj;
+    };
+    const struct page_map pages[] = {
+        { SETTINGS_PAGE_DISPLAY, s_display_page },
+        { SETTINGS_PAGE_SOUND, s_sound_page },
+        { SETTINGS_PAGE_WALLPAPER, s_wallpaper_page },
+        { SETTINGS_PAGE_TIME, s_time_page },
+        { SETTINGS_PAGE_ABOUT, s_about_page },
+    };
+
+    s_current_page_id = SETTINGS_PAGE_ROOT;
+    for(uint32_t i = 0; i < sizeof(pages) / sizeof(pages[0]); i++) {
+        if(page == pages[i].obj) {
+            s_current_page_id = pages[i].id;
+            break;
+        }
+    }
 }
 
 static void settings_menu_delete_cb(lv_event_t * e)

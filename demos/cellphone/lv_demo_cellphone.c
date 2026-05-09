@@ -269,9 +269,9 @@ fail:
 }
 #endif /* LV_USE_FONT_VEC */
 
-const cellphone_motion_preset_t CELLPHONE_MOTION_STANDARD   = { 300, 250, lv_anim_path_ease_in_out };
-const cellphone_motion_preset_t CELLPHONE_MOTION_EMPHASIZED = { 400, 300, lv_anim_path_ease_in_out };
-const cellphone_motion_preset_t CELLPHONE_MOTION_QUICK      = { 150, 100, lv_anim_path_ease_in_out };
+const cellphone_motion_preset_t CELLPHONE_MOTION_STANDARD   = { 240, 220, lv_anim_path_ease_in_out };
+const cellphone_motion_preset_t CELLPHONE_MOTION_EMPHASIZED = { 320, 260, lv_anim_path_ease_in_out };
+const cellphone_motion_preset_t CELLPHONE_MOTION_QUICK      = { 120, 110, lv_anim_path_ease_out };
 
 /**********************
  *  STATIC PROTOTYPES
@@ -324,30 +324,31 @@ static uint32_t s_screen_event_hidden;
 static lv_style_t s_pressed_style;
 static bool s_pressed_style_inited;
 
-/** Icon image descriptors (from assets/) */
-LV_IMAGE_DECLARE(img_icon_phone);
-LV_IMAGE_DECLARE(img_icon_contacts);
-LV_IMAGE_DECLARE(img_icon_sms);
-LV_IMAGE_DECLARE(img_icon_calc);
-LV_IMAGE_DECLARE(img_icon_music);
-LV_IMAGE_DECLARE(img_icon_photo);
-LV_IMAGE_DECLARE(img_icon_settings);
-LV_IMAGE_DECLARE(img_icon_clock);
+/* Modern phone-UI palette: flat saturated tones tuned for white glyphs
+ * (Tailwind 500-tier) so the icon grid reads cleanly on both Olive and
+ * Dark themes without per-theme palette flips. Apps either map to a
+ * bundled FA5 glyph (icon_text) or to a procedural drawer (glyph_draw)
+ * -- never to a text monogram. */
+#define CELLPHONE_APP_LIST(X) \
+    X("Phone",      LV_SYMBOL_CALL,     NULL,                       0x22C55E, cellphone_dialer_create) \
+    X("Contacts",   LV_SYMBOL_LIST,     NULL,                       0x3B82F6, cellphone_contacts_create) \
+    X("Messages",   NULL,               cellphone_glyph_messages,   0x10B981, cellphone_sms_create) \
+    X("Calculator", NULL,               cellphone_glyph_calculator, 0xF59E0B, cellphone_calc_create) \
+    X("Music",      LV_SYMBOL_AUDIO,    NULL,                       0xEC4899, cellphone_music_create) \
+    X("Photos",     LV_SYMBOL_IMAGE,    NULL,                       0xF97316, cellphone_photo_create) \
+    X("Camera",     NULL,               cellphone_glyph_camera,     0x6B7280, cellphone_camera_create) \
+    X("Settings",   LV_SYMBOL_SETTINGS, NULL,                       0x64748B, cellphone_settings_create) \
+    X("Call Log",   LV_SYMBOL_REFRESH,  NULL,                       0x8B5CF6, cellphone_calllog_create) \
+    X("Snake",      NULL,               cellphone_glyph_snake,      0x14B8A6, cellphone_snake_create) \
+    X("Pong",       NULL,               cellphone_glyph_pong,       0x6366F1, cellphone_pong_create) \
+    X("Tetris",     NULL,               cellphone_glyph_tetris,     0xEF4444, cellphone_tetris_create)
 
 /** App registry -- order matches the home screen grid. */
 static const cellphone_app_entry_t s_apps[] = {
-    { "Phone",      &img_icon_phone,    cellphone_dialer_create },
-    { "Contacts",   &img_icon_contacts, cellphone_contacts_create },
-    { "Messages",   &img_icon_sms,      cellphone_sms_create },
-    { "Calculator", &img_icon_calc,     cellphone_calc_create },
-    { "Music",      &img_icon_music,    cellphone_music_create },
-    { "Photos",     &img_icon_photo,    cellphone_photo_create },
-    { "Camera",     NULL,               cellphone_camera_create },
-    { "Settings",   &img_icon_settings, cellphone_settings_create },
-    { "Call Log",   &img_icon_clock,    cellphone_calllog_create },
-    { "Snake",      NULL,               cellphone_snake_create },
-    { "Pong",       NULL,               cellphone_pong_create },
-    { "Tetris",     NULL,               cellphone_tetris_create },
+#define X(name, icon_text, glyph_draw, color_hex, create_fn) \
+    { name, icon_text, glyph_draw, color_hex, create_fn },
+    CELLPHONE_APP_LIST(X)
+#undef X
 };
 
 #define APP_COUNT (sizeof(s_apps) / sizeof(s_apps[0]))
@@ -620,6 +621,15 @@ lv_obj_t * cellphone_obj_fill(lv_obj_t * parent, lv_color_t color)
     return obj;
 }
 
+lv_obj_t * cellphone_obj_transparent(lv_obj_t * parent)
+{
+    lv_obj_t * obj = cellphone_obj_bare(parent);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(obj, 0, 0);
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+    return obj;
+}
+
 void cellphone_obj_paint_grad(lv_obj_t * obj, lv_color_t top, lv_color_t bot)
 {
     lv_obj_set_style_bg_color(obj, top, 0);
@@ -687,28 +697,22 @@ void cellphone_screen_push(cellphone_screen_create_fn fn)
     /* Create a new page within the demo root so the demo can run embedded.
      * Strip all default theme styles (padding, border, radius) so the page
      * fills s_stack_host edge-to-edge without clipping its children. */
-    lv_obj_t * scr = lv_obj_create(s_stack_host);
-    lv_obj_remove_style_all(scr);
+    lv_obj_t * scr = cellphone_obj_transparent(s_stack_host);
     lv_obj_set_pos(scr, 0, 0);
     lv_obj_set_size(scr, lv_pct(100), lv_pct(100));
     /* Subtle vertical gradient so the LCD area reads as a glossy panel, not a
      * flat block of color. Both stops come from the active theme; for themes
      * where a flat look is desired, set bg_grad equal to bg. */
     cellphone_obj_paint_grad(scr, CELLPHONE_COLOR_BG, CELLPHONE_COLOR_BG_GRAD);
-    lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
 
     /*
      * Content area: sits between status bar and nav bar.
      * We create a container at the right position so the app's
      * create function doesn't need to know about chrome geometry.
      */
-    lv_obj_t * content = lv_obj_create(scr);
-    lv_obj_remove_style_all(content);
+    lv_obj_t * content = cellphone_obj_transparent(scr);
     lv_obj_set_pos(content, 0, CELLPHONE_CONTENT_Y);
     lv_obj_set_size(content, CELLPHONE_CONTENT_W, CELLPHONE_CONTENT_H);
-    lv_obj_set_style_bg_opa(content, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_pad_all(content, 0, 0);
-    lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
 
     /* Let the app populate the content area */
     fn(content);
@@ -892,8 +896,7 @@ static void create_demo(lv_obj_t * parent,
     }
 #endif
 
-    s_root = lv_obj_create(parent);
-    lv_obj_remove_style_all(s_root);
+    s_root = cellphone_obj_transparent(parent);
 #if defined(LV_DEMO_CELLPHONE_SKIN) && LV_DEMO_CELLPHONE_SKIN && LV_USE_SDL
     if(use_skin) {
         lv_obj_set_size(s_root, skin->frame_w, skin->frame_h);
@@ -905,7 +908,6 @@ static void create_demo(lv_obj_t * parent,
     lv_obj_set_size(s_root, lv_pct(100), lv_pct(100));
 #endif
     cellphone_obj_paint_fill(s_root, CELLPHONE_COLOR_BG);
-    lv_obj_clear_flag(s_root, LV_OBJ_FLAG_SCROLLABLE);
 
     /*
      * Determine where demo content lives. In skin mode, the skin layer
@@ -941,17 +943,14 @@ static void create_demo(lv_obj_t * parent,
  */
 static void create_hosts(lv_obj_t * host_parent)
 {
-    s_stack_host = lv_obj_create(host_parent);
-    lv_obj_remove_style_all(s_stack_host);
+    s_stack_host = cellphone_obj_transparent(host_parent);
     lv_obj_set_pos(s_stack_host, 0, 0);
     lv_obj_set_size(s_stack_host, lv_pct(100), lv_pct(100));
-    lv_obj_clear_flag(s_stack_host, LV_OBJ_FLAG_SCROLLABLE);
 
-    s_overlay_host = lv_obj_create(host_parent);
-    lv_obj_remove_style_all(s_overlay_host);
+    s_overlay_host = cellphone_obj_transparent(host_parent);
     lv_obj_set_pos(s_overlay_host, 0, 0);
     lv_obj_set_size(s_overlay_host, lv_pct(100), lv_pct(100));
-    lv_obj_clear_flag(s_overlay_host, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(s_overlay_host, LV_OBJ_FLAG_CLICKABLE);
 }
 
 static void create_stack_sequence(const cellphone_screen_create_fn * fns,
