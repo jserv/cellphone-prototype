@@ -49,6 +49,10 @@ typedef struct _lv_demo_args lv_demo_args_t;
 #include "gltf/lv_demo_gltf.h"
 #endif
 
+#if LV_USE_DEMO_CELLPHONE
+#include "cellphone/lv_demo_cellphone.h"
+#endif
+
 /*********************
  *      DEFINES
  *********************/

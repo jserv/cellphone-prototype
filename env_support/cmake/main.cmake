@@ -69,6 +69,9 @@ file(GLOB_RECURSE SOURCES ${LVGL_ROOT_DIR}/src/*.c
                           ${LVGL_ROOT_DIR}/src/*.S)
 file(GLOB_RECURSE EXAMPLE_SOURCES ${LVGL_ROOT_DIR}/examples/*.c)
 file(GLOB_RECURSE DEMO_SOURCES ${LVGL_ROOT_DIR}/demos/*.c)
+# host/ subdirs hold per-demo entry points (e.g. main_sdl, main_test) that
+# define their own main() and must not be linked into liblvgl_demos.a.
+list(FILTER DEMO_SOURCES EXCLUDE REGEX "/demos/[^/]+/host/.*\\.c$")
 file(GLOB_RECURSE THORVG_SOURCES ${LVGL_ROOT_DIR}/src/libs/thorvg/*.cpp
                                  ${LVGL_ROOT_DIR}/src/others/vg_lite_tvg/*.cpp)
 

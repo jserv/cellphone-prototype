@@ -4931,6 +4931,31 @@
             #define LV_USE_DEMO_SMARTWATCH      0
         #endif
     #endif
+
+    /* Cell phone UX demo */
+    #ifndef LV_USE_DEMO_CELLPHONE
+        #ifdef CONFIG_LV_USE_DEMO_CELLPHONE
+            #define LV_USE_DEMO_CELLPHONE CONFIG_LV_USE_DEMO_CELLPHONE
+        #else
+            #define LV_USE_DEMO_CELLPHONE       0
+        #endif
+    #endif
+    #if LV_USE_DEMO_CELLPHONE
+        #ifndef LV_DEMO_CELLPHONE_LARGE
+            #ifdef CONFIG_LV_DEMO_CELLPHONE_LARGE
+                #define LV_DEMO_CELLPHONE_LARGE CONFIG_LV_DEMO_CELLPHONE_LARGE
+            #else
+                #define LV_DEMO_CELLPHONE_LARGE 0
+            #endif
+        #endif
+        #ifndef LV_DEMO_CELLPHONE_SKIN
+            #ifdef CONFIG_LV_DEMO_CELLPHONE_SKIN
+                #define LV_DEMO_CELLPHONE_SKIN CONFIG_LV_DEMO_CELLPHONE_SKIN
+            #else
+                #define LV_DEMO_CELLPHONE_SKIN  0  /* Device skin bezel (SDL-only) */
+            #endif
+        #endif
+    #endif
 #endif /* LV_BUILD_DEMOS */
 
 

@@ -61,6 +61,10 @@ static const demo_entry_info_t demos_entry_info[] = {
     { "benchmark", .entry_cb = lv_demo_benchmark },
 #endif
 
+#if LV_USE_DEMO_CELLPHONE
+    { "cellphone", .entry_cb = lv_demo_cellphone },
+#endif
+
     { "", .entry_cb = NULL }
 };
 

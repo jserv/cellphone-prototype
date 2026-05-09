@@ -1568,6 +1568,13 @@
 
     /* Smart watch demo */
     #define LV_USE_DEMO_SMARTWATCH      0
+
+    /* Cell phone UX demo */
+    #define LV_USE_DEMO_CELLPHONE       0
+    #if LV_USE_DEMO_CELLPHONE
+        #define LV_DEMO_CELLPHONE_LARGE 0
+        #define LV_DEMO_CELLPHONE_SKIN  0  /* Device skin bezel (SDL-only) */
+    #endif
 #endif /* LV_BUILD_DEMOS */
 
 /*--END OF LV_CONF_H--*/
