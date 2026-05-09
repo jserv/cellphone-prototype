@@ -22,6 +22,7 @@
 
 #include "lvgl.h"
 #include "mem_report.h"
+#include "lv_demo_cellphone_common.h"
 
 #if defined(CELLPHONE_TEST_REPORT)
 
@@ -165,6 +166,125 @@ static void mem_report_walk_pool(void)
     }
 }
 
+#if LV_USE_FONT_VEC
+typedef struct {
+    const char * name;
+    const lv_font_t * font;
+} vec_font_slot_t;
+
+static bool vec_font_seen(const lv_font_t * const * seen_fonts, uint32_t seen_count,
+                          const lv_font_t * font)
+{
+    for(uint32_t i = 0; i < seen_count; i++) {
+        if(seen_fonts[i] == font) return true;
+    }
+    return false;
+}
+
+static void report_vec_font_chain(const char * chain_name, const lv_font_t * font,
+                                  const lv_font_t ** seen_fonts, uint32_t seen_cap,
+                                  uint32_t * seen_count,
+                                  size_t * total_used, size_t * total_max)
+{
+    uint32_t depth = 0;
+
+    if(font == NULL) {
+        printf("  %-12s : not configured\n", chain_name);
+        return;
+    }
+
+    while(font != NULL) {
+        char slot_name[32];
+        if(depth == 0) {
+            lv_snprintf(slot_name, sizeof(slot_name), "%s", chain_name);
+        }
+        else {
+            lv_snprintf(slot_name, sizeof(slot_name), "%s->fb%" LV_PRIu32,
+                        chain_name, depth);
+        }
+
+        if(vec_font_seen(seen_fonts, *seen_count, font)) {
+            printf("  %-12s : shared with earlier chain\n", slot_name);
+            return;
+        }
+
+        if(*seen_count >= seen_cap) {
+            printf("  %-12s : seen-buffer full (cap=%" LV_PRIu32 "), truncating\n",
+                   slot_name, seen_cap);
+            return;
+        }
+
+        seen_fonts[*seen_count] = font;
+        (*seen_count)++;
+
+        int32_t px = lv_font_vec_get_instance_pixel_size(font);
+        if(px <= 0) {
+            printf("  %-12s : non-vec font\n", slot_name);
+            font = font->fallback;
+            depth++;
+            continue;
+        }
+
+        size_t used = 0;
+        size_t max = 0;
+        if(!lv_font_vec_get_instance_l2_size(font, &used, &max)) {
+            printf("  %-12s : pixel=%" LV_PRId32 ", L2 disabled\n", slot_name, px);
+            font = font->fallback;
+            depth++;
+            continue;
+        }
+
+        *total_used += used;
+        *total_max += max;
+        printf("  %-12s : pixel=%" LV_PRId32 ", L2=%zu/%zu B\n",
+               slot_name, px, used, max);
+
+        font = font->fallback;
+        depth++;
+    }
+}
+
+static size_t report_vec_font_caches(void)
+{
+#if LV_FONT_VEC_CACHE_SIZE > 0
+    const cellphone_theme_t * theme = cellphone_theme_active();
+    size_t total_used = 0;
+    size_t total_max = 0;
+    const lv_font_t * seen_fonts[16];
+    uint32_t seen_count = 0;
+    uint32_t l1_hits = 0, l1_misses = 0;
+    uint32_t l2_hits = 0, l2_misses = 0;
+    const vec_font_slot_t slots[] = {
+        { "sm(12)", theme->font_sm },
+        { "normal(14)", theme->font_normal },
+        { "heading(16)", theme->font_heading },
+        { "large(22)", theme->font_large },
+        { "clock(32)", theme->font_clock },
+    };
+
+    printf("\nVector font caches:\n");
+    for(uint32_t i = 0; i < sizeof(slots) / sizeof(slots[0]); i++) {
+        report_vec_font_chain(slots[i].name, slots[i].font,
+                              seen_fonts, sizeof(seen_fonts) / sizeof(seen_fonts[0]),
+                              &seen_count, &total_used, &total_max);
+    }
+
+    lv_font_vec_get_l1_stats(&l1_hits, &l1_misses);
+    lv_font_vec_get_l2_stats(&l2_hits, &l2_misses);
+    printf("  total L2       : %zu/%zu B\n", total_used, total_max);
+    printf("  lifetime L1    : hits=%" LV_PRIu32 " misses=%" LV_PRIu32 "\n",
+           l1_hits, l1_misses);
+    printf("  lifetime L2    : hits=%" LV_PRIu32 " misses=%" LV_PRIu32 "\n",
+           l2_hits, l2_misses);
+    return total_used;
+#else
+    printf("\nVector font caches:\n");
+    printf("  disabled at build time (LV_FONT_VEC_CACHE_SIZE == 0)\n");
+    return 0;
+#endif
+}
+#endif
+
 void cellphone_mem_report(void)
 {
     s_bucket_count = 0;
@@ -251,8 +371,20 @@ void cellphone_mem_report(void)
            (unsigned)accounted, (unsigned)(accounted / 1024));
     printf("  pool used (monitor)   : %zu bytes (%zu KiB)\n",
            pool_used, pool_used / 1024);
+#if LV_USE_FONT_VEC
+    /* Print the vec-font cache section unconditionally so its presence
+     * is not coupled to whether the residual accounting is non-zero. */
+    size_t vec_cache_used = report_vec_font_caches();
+#endif
     if(pool_used > accounted) {
-        uint32_t residual = (uint32_t)(pool_used - accounted);
+        size_t residual_sz = pool_used - accounted;
+        uint32_t residual = (uint32_t)residual_sz;
+#if LV_USE_FONT_VEC
+        size_t vec_l2 = vec_cache_used < residual_sz ? vec_cache_used : residual_sz;
+        size_t residual_other = residual_sz - vec_l2;
+        printf("  residual breakdown    : vec L2 ~%zu B, other ~%zu B\n",
+               vec_l2, residual_other);
+#endif
         printf("  residual (font cache, theme styles, animation,\n");
         printf("            event lists, child arrays, ...): ~%u bytes (%u KiB)\n",
                (unsigned)residual, (unsigned)(residual / 1024));

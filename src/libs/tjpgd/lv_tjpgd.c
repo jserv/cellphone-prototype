@@ -1,6 +1,6 @@
 /**
  * @file lv_tjpgd.c
- *
+ * Tiny JPEG decoder glue for LVGL's image-decoder interface.
  */
 
 /*********************
@@ -22,11 +22,16 @@
 
 #define DECODER_NAME    "TJPGD"
 
-#define TJPGD_WORKBUFF_SIZE             4096    //Recommended by TJPGD library
+#define TJPGD_WORKBUFF_SIZE 4096 /* Recommended by TJpgDec. */
 
 /**********************
  *      TYPEDEFS
  **********************/
+typedef struct {
+    JDEC jd;
+    lv_fs_file_t file;
+    bool owns_file;
+} lv_tjpgd_session_t;
 
 /**********************
  *  STATIC PROTOTYPES
@@ -153,21 +158,26 @@ static size_t input_func(JDEC * jd, uint8_t * buff, size_t ndata)
 static lv_result_t decoder_open(lv_image_decoder_t * decoder, lv_image_decoder_dsc_t * dsc)
 {
     LV_UNUSED(decoder);
+    lv_tjpgd_session_t * session = lv_malloc_zeroed(sizeof(lv_tjpgd_session_t));
+    uint8_t * workb_temp = lv_malloc(TJPGD_WORKBUFF_SIZE);
     lv_fs_file_t * f = NULL;
+    JRESULT rc = JDR_MEM1;
+
+    if(session == NULL || workb_temp == NULL) goto fail;
+
     if(dsc->src_type == LV_IMAGE_SRC_VARIABLE) {
 #if LV_USE_FS_MEMFS
         const lv_image_dsc_t * img_dsc = dsc->src;
         if(is_jpg(img_dsc->data, img_dsc->data_size) == true) {
-            f = lv_malloc(sizeof(lv_fs_file_t));
-            if(f == NULL) return LV_RESULT_INVALID;
             lv_fs_path_ex_t path;
             lv_fs_make_path_from_buffer(&path, LV_FS_MEMFS_LETTER, img_dsc->data, img_dsc->data_size, "bin");
             lv_fs_res_t res;
-            res = lv_fs_open(f, (const char *)&path, LV_FS_MODE_RD);
+            res = lv_fs_open(&session->file, (const char *)&path, LV_FS_MODE_RD);
             if(res != LV_FS_RES_OK) {
-                lv_free(f);
-                return LV_RESULT_INVALID;
+                goto fail;
             }
+            session->owns_file = true;
+            f = &session->file;
         }
 #else
         LV_LOG_WARN("LV_USE_FS_MEMFS needs to enabled to decode from data");
@@ -176,41 +186,35 @@ static lv_result_t decoder_open(lv_image_decoder_t * decoder, lv_image_decoder_d
     else if(dsc->src_type == LV_IMAGE_SRC_FILE) {
         const char * fn = dsc->src;
         if((lv_strcmp(lv_fs_get_ext(fn), "jpg") == 0) || (lv_strcmp(lv_fs_get_ext(fn), "jpeg") == 0)) {
-            f = lv_malloc(sizeof(lv_fs_file_t));
-            if(f == NULL) return LV_RESULT_INVALID;
-            lv_fs_res_t res;
-            res = lv_fs_open(f, fn, LV_FS_MODE_RD);
+            lv_fs_res_t res = lv_fs_open(&session->file, fn, LV_FS_MODE_RD);
             if(res != LV_FS_RES_OK) {
-                lv_free(f);
-                return LV_RESULT_INVALID;
+                goto fail;
             }
+            session->owns_file = true;
+            f = &session->file;
         }
     }
-    if(f == NULL) return LV_RESULT_INVALID;
+    if(f == NULL) goto fail;
 
-    uint8_t * workb_temp = lv_malloc(TJPGD_WORKBUFF_SIZE);
-    JDEC * jd = lv_malloc(sizeof(JDEC));
-    JRESULT rc = JDR_MEM1;
-
-    if(workb_temp != NULL && jd != NULL)
-        rc = jd_prepare(jd, input_func, workb_temp, (size_t)TJPGD_WORKBUFF_SIZE, f);
-
+    rc = jd_prepare(&session->jd, input_func, workb_temp, (size_t)TJPGD_WORKBUFF_SIZE, f);
     if(rc != JDR_OK) {
-        lv_fs_close(f);
-        lv_free(f);
-        lv_free(workb_temp);
-        lv_free(jd);
-        LV_LOG_WARN("jd_prepare error: %d", rc);
-        return LV_RESULT_INVALID;
+        goto fail;
     }
 
-    dsc->user_data = jd;
+    dsc->user_data = session;
     dsc->header.cf = LV_COLOR_FORMAT_RGB888;
-    dsc->header.w = jd->width;
-    dsc->header.h = jd->height;
-    dsc->header.stride = jd->width * 3;
+    dsc->header.w = session->jd.width;
+    dsc->header.h = session->jd.height;
+    dsc->header.stride = session->jd.width * 3;
 
     return LV_RESULT_OK;
+
+fail:
+    if(session && session->owns_file) lv_fs_close(&session->file);
+    lv_free(workb_temp);
+    lv_free(session);
+    if(rc != JDR_MEM1) LV_LOG_WARN("jd_prepare error: %d", rc);
+    return LV_RESULT_INVALID;
 }
 
 static lv_result_t decoder_get_area(lv_image_decoder_t * decoder, lv_image_decoder_dsc_t * dsc,
@@ -219,7 +223,8 @@ static lv_result_t decoder_get_area(lv_image_decoder_t * decoder, lv_image_decod
     LV_UNUSED(decoder);
     LV_UNUSED(full_area);
 
-    JDEC * jd = dsc->user_data;
+    lv_tjpgd_session_t * session = dsc->user_data;
+    JDEC * jd = &session->jd;
     lv_draw_buf_t * decoded = (void *)dsc->decoded;
 
     uint32_t  mx, my;
@@ -304,11 +309,12 @@ static lv_result_t decoder_get_area(lv_image_decoder_t * decoder, lv_image_decod
 static void decoder_close(lv_image_decoder_t * decoder, lv_image_decoder_dsc_t * dsc)
 {
     LV_UNUSED(decoder);
-    JDEC * jd = dsc->user_data;
-    lv_fs_close(jd->device);
-    lv_free(jd->device);
-    lv_free(jd->pool_original);
-    lv_free(jd);
+    lv_tjpgd_session_t * session = dsc->user_data;
+    if(session) {
+        if(session->owns_file) lv_fs_close(&session->file);
+        lv_free(session->jd.pool_original);
+        lv_free(session);
+    }
     lv_free((void *)dsc->decoded);
 }
 

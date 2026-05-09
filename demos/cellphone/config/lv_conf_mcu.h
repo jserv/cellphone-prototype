@@ -93,6 +93,7 @@ extern const struct _lv_font_t lv_font_vec_stub;
 
 #define LV_USE_SDL 0
 #define LV_USE_SNAPSHOT 0
+#define LV_DEMO_CELLPHONE_PHOTOS_SOURCE 2
 
 #define LV_USE_FLEX 1
 #define LV_USE_GRID 1

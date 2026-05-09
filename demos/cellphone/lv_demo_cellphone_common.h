@@ -152,11 +152,11 @@ void cellphone_theme_set(uint32_t idx);
 #define CELLPHONE_FONT_CLOCK    (cellphone_theme_active()->font_clock)
 
 #ifndef LV_DEMO_CELLPHONE_FONT_CACHE_SM
-#define LV_DEMO_CELLPHONE_FONT_CACHE_SM        (2 * 1024)
+#define LV_DEMO_CELLPHONE_FONT_CACHE_SM        1536
 #endif
 
 #ifndef LV_DEMO_CELLPHONE_FONT_CACHE_NORMAL
-#define LV_DEMO_CELLPHONE_FONT_CACHE_NORMAL    (2 * 1024)
+#define LV_DEMO_CELLPHONE_FONT_CACHE_NORMAL    1536
 #endif
 
 #ifndef LV_DEMO_CELLPHONE_FONT_CACHE_HEADING
@@ -164,11 +164,30 @@ void cellphone_theme_set(uint32_t idx);
 #endif
 
 #ifndef LV_DEMO_CELLPHONE_FONT_CACHE_LARGE
-#define LV_DEMO_CELLPHONE_FONT_CACHE_LARGE     (2 * 1024)
+/* The home-icon plates render their glyphs inside LV_EVENT_DRAW_MAIN on
+ * every paint tick, so the L2 cache must be on (the previous "0" budget
+ * forced re-rasterization every frame). 1 KiB is the current floor that
+ * still keeps the demo workload inside the harness' hit-rate window while
+ * matching the MCU profile's SRAM budget. Larger values buy little on this
+ * working set and push the full-run peak closer to the 76 KiB ceiling. */
+#define LV_DEMO_CELLPHONE_FONT_CACHE_LARGE     1024
 #endif
 
 #ifndef LV_DEMO_CELLPHONE_FONT_CACHE_CLOCK
 #define LV_DEMO_CELLPHONE_FONT_CACHE_CLOCK     0
+#endif
+
+#ifndef LV_DEMO_CELLPHONE_ICON_CACHE_22
+/* The size-22 icon fallback font handles all 6 FA5 home-grid glyphs
+ * painted in LV_EVENT_DRAW_MAIN every tick. The size-matched body
+ * font's L2 cache doesn't help here because FA5 codepoints miss the
+ * body charmap and fall through to this font. Steady-state working
+ * set is ~540 B (6 glyphs * ~90 B/glyph A8); 768 B holds it with
+ * a 1-glyph eviction buffer for transient screens (settings cog,
+ * music note). The Test-11 gate (>=60%) reads 63.6% at both 1024
+ * and 768 -- the gate's misses are dominated by SM/NORMAL text
+ * caches, not this fallback, so trimming here is free. */
+#define LV_DEMO_CELLPHONE_ICON_CACHE_22        768
 #endif
 
 /*********************

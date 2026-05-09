@@ -31,6 +31,7 @@ static lv_obj_t * page_label(lv_obj_t * parent, const char * text,
                              const lv_font_t * font);
 static lv_obj_t * make_time_roller(lv_obj_t * parent, uint32_t mod);
 static void style_dropdown_list(lv_obj_t * dd);
+static void dropdown_ready_cb(lv_event_t * e);
 static void build_dropdown_opts(char * buf, uint32_t buf_size,
                                 const char * (*get_name)(uint32_t idx), uint32_t count);
 static const char * theme_name_at(uint32_t idx);
@@ -371,7 +372,12 @@ static lv_obj_t * setting_dropdown(lv_obj_t * page, const char * label,
     lv_obj_set_style_text_letter_space(dd, 1, 0);
     lv_dropdown_set_options(dd, opts);
     lv_dropdown_set_selected(dd, selected);
-    style_dropdown_list(dd);
+    /* The popup list is created lazily on the first open; lv_dropdown_open
+     * fires LV_EVENT_READY after creating it specifically so callers can
+     * style it. Hooking READY (instead of styling at construction) ensures
+     * the popup uses the cellphone vec font on every open instead of
+     * falling back to the zero-glyph LV_FONT_DEFAULT stub. */
+    lv_obj_add_event_cb(dd, dropdown_ready_cb, LV_EVENT_READY, NULL);
     lv_obj_add_event_cb(dd, cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     return dd;
@@ -421,6 +427,11 @@ static void style_dropdown_list(lv_obj_t * dd)
         lv_obj_set_style_text_font(label, font, 0);
         lv_obj_set_style_text_letter_space(label, 1, 0);
     }
+}
+
+static void dropdown_ready_cb(lv_event_t * e)
+{
+    style_dropdown_list(lv_event_get_target(e));
 }
 
 static void theme_apply_timer_cb(lv_timer_t * t)

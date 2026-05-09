@@ -10,6 +10,7 @@
 #   demos/cellphone/build.sh              # build lib + demo binary
 #   demos/cellphone/build.sh test         # also build + run the test (172 checks)
 #   demos/cellphone/build.sh report       # test build with heap-report diagnostic
+#   demos/cellphone/build.sh screenshot   # capture lock + home PNGs into screenshots/
 #   demos/cellphone/build.sh demo         # build lib + demo, then run it
 #   demos/cellphone/build.sh clean        # remove build/
 #   demos/cellphone/build.sh help         # print this help
@@ -176,7 +177,8 @@ configure() {
     cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" -G "${GENERATOR}" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DLV_BUILD_SET_CONFIG_OPTS=ON \
-          -DLV_BUILD_CONF_DIR="${PROJECT_ROOT}/demos/cellphone/config"
+          -DLV_BUILD_CONF_DIR="${PROJECT_ROOT}/demos/cellphone/config" \
+          -DLV_DEMO_CELLPHONE_PHOTOS_DIR="${PROJECT_ROOT}/demos/cellphone/assets/photos"
 }
 
 build_lib() {
@@ -194,12 +196,14 @@ link_binary() {
     local cc_bin="${CC:-cc}"
 
     case "${mode}" in
-        demo)   main_src="${PROJECT_ROOT}/demos/cellphone/host/main_sdl.c"  ;;
-        test)   main_src="${PROJECT_ROOT}/demos/cellphone/host/main_test.c" ;;
-        report) main_src="${PROJECT_ROOT}/demos/cellphone/host/main_test.c"
-                extra_src+=("${PROJECT_ROOT}/demos/cellphone/mem_report.c")
-                extra_def+=(-DCELLPHONE_TEST_REPORT) ;;
-        *)      echo "internal: unknown mode ${mode}" >&2; exit 1 ;;
+        demo)       main_src="${PROJECT_ROOT}/demos/cellphone/host/main_sdl.c"  ;;
+        test)       main_src="${PROJECT_ROOT}/demos/cellphone/host/main_test.c" ;;
+        report)     main_src="${PROJECT_ROOT}/demos/cellphone/host/main_test.c"
+                    extra_src+=("${PROJECT_ROOT}/demos/cellphone/mem_report.c")
+                    extra_def+=(-DCELLPHONE_TEST_REPORT) ;;
+        screenshot) main_src="${PROJECT_ROOT}/demos/cellphone/host/main_test.c"
+                    extra_def+=(-DCELLPHONE_TEST_SCREENSHOT) ;;
+        *)          echo "internal: unknown mode ${mode}" >&2; exit 1 ;;
     esac
 
     echo ">>> link ${out} (mode=${mode}, cc=${cc_bin})"
@@ -241,6 +245,32 @@ case "${cmd}" in
         link_binary "${BUILD_DIR}/cellphone_test_report" report
         echo ">>> run cellphone_test_report (with heap diagnostic)"
         "${BUILD_DIR}/cellphone_test_report"
+        ;;
+    screenshot)
+        if ! command -v convert >/dev/null 2>&1; then
+            echo "error: 'convert' (ImageMagick) is required to encode PNGs" >&2
+            echo "       macOS:  brew install imagemagick" >&2
+            echo "       Debian: apt install imagemagick" >&2
+            exit 1
+        fi
+        build_lib
+        link_binary "${BUILD_DIR}/cellphone_test_screenshot" screenshot
+        echo ">>> run cellphone_test_screenshot (captures PPMs to /tmp)"
+        "${BUILD_DIR}/cellphone_test_screenshot"
+        # Convert PPM intermediates to PNG and place in screenshots/.
+        # The harness writes /tmp/cellphone_<name>.ppm; here we strip the
+        # cellphone_ prefix and re-encode losslessly with convert.
+        out_dir="${PROJECT_ROOT}/demos/cellphone/screenshots"
+        mkdir -p "${out_dir}"
+        for ppm in /tmp/cellphone_*.ppm; do
+            [[ -e "${ppm}" ]] || continue
+            base="$(basename "${ppm}" .ppm)"
+            png="${out_dir}/${base#cellphone_}.png"
+            echo ">>> encode ${png}"
+            convert "${ppm}" "${png}"
+            rm -f "${ppm}"
+        done
+        echo ">>> screenshots updated under ${out_dir}"
         ;;
     *)
         echo "unknown command: ${cmd}" >&2

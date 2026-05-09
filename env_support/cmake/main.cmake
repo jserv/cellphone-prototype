@@ -8,6 +8,9 @@ set(LV_BUILD_CONF_PATH "" CACHE PATH
 set(LV_BUILD_CONF_DIR "" CACHE PATH
     "Can be used to specify the include dir containing lv_conf.h, to be used in conjunction with LV_CONF_INCLUDE_SIMPLE")
 
+set(LV_DEMO_CELLPHONE_PHOTOS_DIR "" CACHE PATH
+    "Absolute path to the cellphone demo's JPEG photo asset directory")
+
 option(LV_BUILD_USE_KCONFIG "Use Kconfig" OFF)
 set(LV_BUILD_DEFCONFIG_PATH "" CACHE PATH
     "Supply the default Kconfig configuration - used with Kconfig")
@@ -286,6 +289,14 @@ if(CONFIG_LV_BUILD_DEMOS)
     add_library(lvgl::demos ALIAS lvgl_demos)
     target_include_directories(lvgl_demos SYSTEM PUBLIC ${LVGL_ROOT_DIR}/demos)
     set_target_properties(lvgl_demos PROPERTIES COMPILE_DEFINITIONS "${COMP_DEF}")
+    if(LV_DEMO_CELLPHONE_PHOTOS_DIR)
+        if (NOT IS_ABSOLUTE ${LV_DEMO_CELLPHONE_PHOTOS_DIR})
+            file(REAL_PATH ${LV_DEMO_CELLPHONE_PHOTOS_DIR} LV_DEMO_CELLPHONE_PHOTOS_DIR
+                BASE_DIRECTORY ${CMAKE_SOURCE_DIR})
+        endif()
+        target_compile_definitions(lvgl_demos PUBLIC
+            CELLPHONE_PHOTOS_DIR="${LV_DEMO_CELLPHONE_PHOTOS_DIR}")
+    endif()
 
     # This tells cmake to link lvgl with lvgl_examples
     # PUBLIC allows code linking with LVGL to also use the library

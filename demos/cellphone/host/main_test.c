@@ -4,9 +4,10 @@
  * Automated test harness for the Cell Phone Demo.
  * Validates the full user journey:
  *   boot -> unlock -> home -> launch each app -> back -> repeat
- * Gates on screen stack depth, object tree content, pool-growth
- * deltas, and per-font cache budgets.  Pure structural validation;
- * no image capture (the SDL host is the visual-inspection path).
+ * Gates on screen stack depth, object tree content, action-level
+ * behavior, pool-growth deltas, and per-font cache budgets. The
+ * harness also samples per-action allocator deltas for the heavier
+ * gesture paths such as Photos browsing.
  *
  * Usage:
  *   build/cellphone_test [--focused]
@@ -34,6 +35,7 @@
 #endif
 
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,6 +44,48 @@
  *********************/
 #define SCR_W   CELLPHONE_HOR_RES    /* 240 */
 #define SCR_H   CELLPHONE_VER_RES    /* 320 */
+
+#ifdef CELLPHONE_TEST_SCREENSHOT
+/* Snapshot the currently active LVGL screen to a P6 PPM file. PPM is
+ * a 3-byte header + raw RGB scanlines, so no encoder dep is needed.
+ * build.sh's `screenshot` mode runs `convert` afterwards to produce
+ * the final PNG. Skips silently if snapshot creation fails (the next
+ * harness gate will already catch a broken screen). */
+static void capture_screen_ppm(const char * out_path)
+{
+    lv_obj_t * scr = lv_screen_active();
+    if(!scr) return;
+
+    lv_draw_buf_t * buf = lv_snapshot_take(scr, LV_COLOR_FORMAT_RGB888);
+    if(!buf) {
+        printf("[screenshot] snapshot failed for %s\n", out_path);
+        return;
+    }
+
+    FILE * f = fopen(out_path, "wb");
+    if(!f) {
+        printf("[screenshot] open failed for %s\n", out_path);
+        lv_draw_buf_destroy(buf);
+        return;
+    }
+
+    uint32_t w = buf->header.w;
+    uint32_t h = buf->header.h;
+    fprintf(f, "P6\n%u %u\n255\n", (unsigned)w, (unsigned)h);
+    /* Write row-by-row using header.stride: lv_snapshot may pad rows
+     * for alignment, so a single fwrite of data_size would carry the
+     * padding bytes into the PPM and shift every scanline. */
+    for(uint32_t y = 0; y < h; y++) {
+        const uint8_t * row = buf->data + (size_t)y * buf->header.stride;
+        fwrite(row, 3, w, f);
+    }
+
+    fclose(f);
+    lv_draw_buf_destroy(buf);
+    printf("[screenshot] wrote %s (%ux%u)\n",
+           out_path, (unsigned)w, (unsigned)h);
+}
+#endif
 
 /**********************
  *  STATIC VARIABLES
@@ -70,6 +114,11 @@ static uint32_t s_l2_misses_pre_test11;
  * tick that sim_wait runs) and track the per-test max here. test_peak_*
  * helpers drive it; sim_wait is what samples. */
 static size_t s_test_peak_used;
+
+typedef struct {
+    uint32_t tick_start;
+    size_t used_start;
+} action_sample_t;
 
 /**********************
  *  TOUCH SIMULATION
@@ -124,6 +173,23 @@ static void test_peak_reset(void)
 static size_t test_peak_get(void)
 {
     return s_test_peak_used;
+}
+
+static action_sample_t action_sample_now(void)
+{
+    action_sample_t sample = {
+        .tick_start = lv_tick_get(),
+        .used_start = mem_used_now(),
+    };
+    return sample;
+}
+
+static void action_report(const char * tag, action_sample_t start)
+{
+    size_t used_end = mem_used_now();
+    ptrdiff_t used_delta = (ptrdiff_t)used_end - (ptrdiff_t)start.used_start;
+    printf("  [action] %s: elapsed=%" LV_PRIu32 " ms, used_delta=%td B\n",
+           tag, lv_tick_elaps(start.tick_start), used_delta);
 }
 
 /** Advance LVGL by ms milliseconds. */
@@ -382,6 +448,23 @@ static lv_obj_t * find_widget_by_class(lv_obj_t * root, const lv_obj_class_t * c
         if(f) return f;
     }
     return NULL;
+}
+
+static uint32_t count_loaded_images(lv_obj_t * root)
+{
+    if(!root) return 0;
+
+    uint32_t n = 0;
+    if(lv_obj_check_type(root, &lv_image_class) && lv_image_get_src(root) != NULL) {
+        n = 1;
+    }
+
+    uint32_t cc = lv_obj_get_child_count(root);
+    for(uint32_t i = 0; i < cc; i++) {
+        n += count_loaded_images(lv_obj_get_child(root, i));
+    }
+
+    return n;
 }
 
 static lv_obj_t * find_first_scrollable_descendant(lv_obj_t * root)
@@ -787,6 +870,10 @@ static void test_01_boot(void)
 
     check("demo started", cellphone_screen_depth() == 2);
     check("booted to lock screen", cellphone_screen_top_is(cellphone_lock_create));
+
+#ifdef CELLPHONE_TEST_SCREENSHOT
+    capture_screen_ppm("/tmp/cellphone_01_lock_screen.ppm");
+#endif
 }
 
 /** Drive the lock-screen slider via simulated drag gestures and assert
@@ -847,6 +934,10 @@ static void test_02_unlock(void)
           !cellphone_screen_top_is(cellphone_lock_create));
     check("full slide: home screen on top",
           cellphone_screen_top_is(cellphone_home_create));
+
+#ifdef CELLPHONE_TEST_SCREENSHOT
+    capture_screen_ppm("/tmp/cellphone_02_home_screen.ppm");
+#endif
 }
 
 static void test_app(const char * name, cellphone_screen_create_fn fn)
@@ -887,73 +978,102 @@ static void test_app(const char * name, cellphone_screen_create_fn fn)
     printf("  [peak] %s test peak: %zu KiB\n", name, test_peak_get() / 1024);
 }
 
-/** Photos coverage with gestures: thumbnail tap pushes the viewer,
- *  fullscreen tap toggles chrome via animation (verified by reading the
- *  title bar's y), and a horizontal indev drag must advance the
- *  tileview to the next photo.  test_app("Photos", ...) only smoke-
- *  tested push/pop -- gestures are the path most likely to diverge on
- *  a touch MCU. */
+/** Photos coverage with gestures and decode-window validation.
+ *  The grid must expose the expected handler type, tapping a thumbnail
+ *  must push the fullscreen viewer, chrome toggling must animate
+ *  correctly, and the viewer must keep at most 3 JPEGs loaded at once
+ *  (active tile plus immediate neighbors). */
 static void test_photos_gestures(void)
 {
     printf("\n--- Test: Photos (with gestures) ---\n");
     test_peak_reset();
     int depth_before = cellphone_screen_depth();
+    bool uses_real_jpeg = cellphone_photo_uses_real_jpeg();
 
     cellphone_screen_push(cellphone_photo_create);
     sim_wait(500);
     check("Photos pushed", cellphone_screen_depth() == depth_before + 1);
 
-    /* Tap thumbnail '1' (label child of the first grid cell, CLICKABLE) */
+    lv_obj_t * photos = cellphone_screen_top();
+    check("photo source mode available", cellphone_photo_is_available());
+    check("photo source name is consistent",
+          strcmp(cellphone_photo_source_name(),
+                 uses_real_jpeg ? "real-jpeg" : "dummy") == 0
+          || strcmp(cellphone_photo_source_name(), "unavailable-real-jpeg") == 0);
+    if(uses_real_jpeg) {
+        lv_obj_t * thumb_img = find_widget_by_class(photos, &lv_image_class);
+        check("photo grid contains an image widget", thumb_img != NULL);
+        if(thumb_img) {
+            check("thumbnail JPEG header decoded",
+                  lv_image_get_src_width(thumb_img) > 0
+                  && lv_image_get_src_height(thumb_img) > 0);
+        }
+    }
+    else {
+        check("dummy mode does not create image widgets",
+              find_widget_by_class(photos, &lv_image_class) == NULL);
+    }
+
+    action_sample_t open_sample = action_sample_now();
     int depth_after_thumb = cellphone_screen_depth();
-    check("tap thumbnail '1'", sim_tap_label("1"));
+    check("tap thumbnail 'Portrait'", sim_tap_label("Portrait"));
     sim_wait(500);
+    action_report("photo open", open_sample);
     check("photo viewer pushed",
           cellphone_screen_depth() == depth_after_thumb + 1);
 
-    /* Resolve the viewer's title bar by walking up from its 'Photos'
-     * label child.  The bar's y starts at 0 and the fullscreen toggle
-     * animates it to -28 (and back).  Reading y is more precise than
-     * inferring visibility from labels, since the bar still exists in
-     * the tree after the slide. */
     lv_obj_t * viewer = cellphone_screen_top();
     lv_obj_t * title_lbl = find_label_obj(viewer, "Photos");
     check("viewer title 'Photos' label present", title_lbl != NULL);
+    check("viewer shows first photo title", screen_has_label_text(viewer, "Portrait"));
+    if(uses_real_jpeg) {
+        lv_obj_t * viewer_img = find_widget_by_class(viewer, &lv_image_class);
+        check("viewer contains an image widget", viewer_img != NULL);
+        if(viewer_img) {
+            check("fullscreen JPEG header decoded",
+                  lv_image_get_src_width(viewer_img) > 0
+                  && lv_image_get_src_height(viewer_img) > 0);
+        }
+        check("viewer keeps <= 3 JPEGs loaded at open",
+              count_loaded_images(viewer) <= 3);
+    }
     if(title_lbl) {
         lv_obj_t * title_bar = lv_obj_get_parent(title_lbl);
         check("viewer title bar starts at y=0", lv_obj_get_y(title_bar) == 0);
 
-        /* Enter fullscreen: viewer_tap_cb animates over 400 ms, settle 500.
-         * sim_tap_label dispatches CLICKED on the rect (its child label is
-         * 'Photo 1'); the rect's CLICKED handler is the toggle. */
-        check("tap photo to enter fullscreen", sim_tap_label("Photo 1"));
+        action_sample_t fullscreen_in = action_sample_now();
+        check("tap photo to enter fullscreen", sim_tap_label("Portrait"));
         sim_wait(500);
+        action_report("photo fullscreen enter", fullscreen_in);
         check("title bar slid off-screen at y=-28",
               lv_obj_get_y(title_bar) == -28);
 
-        /* Exit fullscreen: 300 ms anim, settle 500. */
-        check("tap photo to exit fullscreen", sim_tap_label("Photo 1"));
+        action_sample_t fullscreen_out = action_sample_now();
+        check("tap photo to exit fullscreen", sim_tap_label("Portrait"));
         sim_wait(500);
+        action_report("photo fullscreen exit", fullscreen_out);
         check("title bar restored to y=0", lv_obj_get_y(title_bar) == 0);
     }
 
     check("counter shows '1 / 6'", screen_has_label_text(viewer, "1 / 6"));
 
-    /* Horizontal drag must drive the tileview to the next tile.
-     * sim_drag drives the real indev, so a regression in the tileview's
-     * scroll heuristic or in indev hit-test on a CLICKABLE child rect
-     * trips here.  Park the touch one frame before the press so the
-     * vect computed from a stale last_point doesn't trip find_scroll_obj
-     * onto the wrong widget (same trick as the SMS row tap). */
     int32_t y_mid = CELLPHONE_CONTENT_Y + CELLPHONE_CONTENT_H / 2;
     int32_t x_right = CELLPHONE_HOR_RES - 30;
     int32_t x_left  = 30;
     lv_indev_reset(s_indev, NULL);
     sim_set_touch_point(x_right, y_mid);
     sim_wait(32);
+    action_sample_t swipe_sample = action_sample_now();
     sim_drag(x_right, y_mid, x_left, y_mid, 250);
     sim_wait(500);
+    action_report("photo swipe", swipe_sample);
     check("counter advanced to '2 / 6' after horizontal swipe",
           screen_has_label_text(viewer, "2 / 6"));
+    check("viewer shows second photo title", screen_has_label_text(viewer, "Landscape"));
+    if(uses_real_jpeg) {
+        check("viewer keeps <= 3 JPEGs loaded after swipe",
+              count_loaded_images(viewer) <= 3);
+    }
 
     cellphone_screen_pop();
     sim_wait(800);
@@ -1709,6 +1829,13 @@ int main(int argc, char ** argv)
          * lockstep -- the gate must equal the shipping pool size minus
          * 0 KiB (the gate enforces the budget directly, not headroom). */
         const size_t peak_ceiling = 76 * 1024;
+#ifdef CELLPHONE_TEST_SCREENSHOT
+        /* Screenshot mode runs lv_snapshot_take, which allocates a
+         * full-display RGB888 buffer (~378 KiB at 300x430 with the
+         * skin) and trips the gate by design. Skip the budget check
+         * here -- the regular `test` mode still enforces it. */
+        printf("  [screenshot mode] skipping pool-peak ceiling gate\n");
+#else
         if(pool_peak > peak_ceiling) {
             char msg[128];
             lv_snprintf(msg, sizeof(msg),
@@ -1720,6 +1847,7 @@ int main(int argc, char ** argv)
         else {
             check("pool peak below MCU profile ceiling (76 KiB)", true);
         }
+#endif
     }
 
 #if LV_USE_FONT_VEC

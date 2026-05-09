@@ -234,10 +234,15 @@ static void vec_fonts_init(void)
            != LV_RESULT_OK) goto fail;
         text_ok = i + 1;
     }
-    /* Icon fallback face: sparse FA5 subset, L2 disabled (cache_size=0)
-     * because these glyphs are mostly static after first paint. */
+    /* Icon fallback face: sparse FA5 subset. Size 22 is hot (6 home-grid
+     * glyphs painted in LV_EVENT_DRAW_MAIN every tick); the other sizes
+     * are touched once per screen by static labels and stay at L2=0. */
+    static const uint32_t icon_caches[] = {
+        0, 0, LV_DEMO_CELLPHONE_ICON_CACHE_22, 0,
+    };
     for(uint32_t i = 0; i < n_icon; i++) {
-        if(lv_font_vec_init_ex(icon_fonts[i], icon_d, icon_sizes[i], 0) != LV_RESULT_OK) goto fail;
+        if(lv_font_vec_init_ex(icon_fonts[i], icon_d, icon_sizes[i],
+                               icon_caches[i]) != LV_RESULT_OK) goto fail;
         icon_ok = i + 1;
         text_fonts[icon_text_idx[i]]->fallback = icon_fonts[i];
     }

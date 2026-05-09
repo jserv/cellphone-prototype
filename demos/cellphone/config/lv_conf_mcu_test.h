@@ -33,6 +33,11 @@ extern const struct _lv_font_t lv_font_vec_stub;
 #define LV_SDL_BUF_COUNT 1
 #define LV_USE_SNAPSHOT 1
 
+#define LV_USE_TJPGD 1
+#define LV_USE_FS_STDIO 1
+#define LV_FS_STDIO_LETTER 'P'
+#define LV_DEMO_CELLPHONE_PHOTOS_SOURCE 1
+
 #define LV_USE_FLEX 1
 #define LV_USE_GRID 1
 #define LV_GRADIENT_MAX_STOPS 2
