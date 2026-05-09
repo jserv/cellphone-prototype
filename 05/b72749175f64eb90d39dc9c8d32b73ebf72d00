@@ -1,0 +1,55 @@
+demos/cellphone/config/lv_conf.h
+  s_7cb5a859b1ec84::t_7679c5f3549209 63-67
+demos/cellphone/config/lv_conf_mcu.h
+  s_7cb5a859b1ec84::t_7679c5f3549209 96
+demos/cellphone/lv_demo_cellphone_photo.h
+  s_7cb5a859b1ec84::t_7679c5f3549209 16-19,21-25
+demos/cellphone/build.sh
+  s_7cb5a859b1ec84::t_7679c5f3549209 180-181
+  s_7cb5a859b1ec84::t_d8950d647f04a7 199-201,204
+  s_7cb5a859b1ec84::t_94ab206016300a 13,202-203,205-206,249-273
+demos/cellphone/assets/photos/ATTRIBUTION.md
+  s_7cb5a859b1ec84::t_7679c5f3549209 1-32
+src/libs/tjpgd/lv_tjpgd.c
+  s_7cb5a859b1ec84::t_7679c5f3549209 3,25,30-34,161-162,164-167,175,177,179-180,189,191,193-194,197,199,201,204,206-208,211-217,226-227,312-317
+demos/cellphone/lv_demo_cellphone_photo.c
+  s_7cb5a859b1ec84::t_1d2ea833d3b7fb 123-125,127
+  s_7cb5a859b1ec84::t_7679c5f3549209 4,9,20-55,61-65,74-75,78-98,100,103,120-122,126,128-131,133-135,139,142,154,156-158,162-168,170-173,175-185,187-194,196-200,203-210,212-215,217-223,226-229,239-240,247,252-255,261-266,269,278-279,281,292-297,301,311-316,318,321-322,325,335,337,341-342,347,350,365-369,371-400,414-507
+demos/cellphone/lv_demo_cellphone_settings.c
+  s_7cb5a859b1ec84::t_42f47a31778385 375-380
+  s_7cb5a859b1ec84::t_21830470bf1160 432-436
+  s_7cb5a859b1ec84::t_9fac3e17c998ad 34
+demos/cellphone/README.md
+  s_7cb5a859b1ec84::t_94ab206016300a 16-22,29-31,84-85,92-93,95,100-101,105-108,111-118,213,222-237,253-280,295-299,333-349
+  s_7cb5a859b1ec84::t_7679c5f3549209 91,140-198
+demos/cellphone/lv_demo_cellphone_common.h
+  s_7cb5a859b1ec84::t_2c68338a2efb6e 155,159,169-173,184-190
+  s_7cb5a859b1ec84::t_18310cb50e0261 167-168,180-183
+demos/cellphone/lv_demo_cellphone.c
+  s_7cb5a859b1ec84::t_ed490b69b10222 237-242,244-245
+demos/cellphone/mem_report.c
+  s_7cb5a859b1ec84::t_08b60d13b7682a 25,169-287,374-378,380-387
+demos/cellphone/host/main_test.c
+  s_7cb5a859b1ec84::t_94ab206016300a 48-89,873-876,937-940,1832-1838,1850
+  s_7cb5a859b1ec84::t_7679c5f3549209 7-10,38,118-122,178-194,453-467,981-985,991,997-1017,1019,1021,1028-1039,1044-1045,1047,1051-1052,1054,1066,1069,1072-1076
+env_support/cmake/main.cmake
+  s_7cb5a859b1ec84::t_7679c5f3549209 11-13,292-299
+demos/cellphone/config/lv_conf_mcu_test.h
+  s_7cb5a859b1ec84::t_7679c5f3549209 36-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "05b72749175f64eb90d39dc9c8d32b73ebf72d00",
+  "prompts": {},
+  "sessions": {
+    "s_7cb5a859b1ec84": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c3b4f29-3b93-4c4e-a197-38aa695ededb",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
