@@ -1,7 +1,5 @@
 src/font/font_vec/lv_font_vec.c
   s_98df2fda793ad6::t_6a77628e7a9967 12
-scripts/built_in_font/ttf-to-vecfont.py
-  s_d417a7a1fcb2f4::t_282bb3b079214e 2,7,232-248,251,257-258,261-263,266-268,273-277,282-285,287-288,290,295-299,301-303,305,327,329-330,365-367,370-373
 ---
 {
   "schema_version": "authorship/3.0.0",
