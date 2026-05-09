@@ -135,6 +135,7 @@
 #include "font/lv_font.h"
 #include "font/lv_font_fmt_txt.h"
 #include "font/lv_font_manager.h"
+#include "font/lv_font_vec.h"
 #include "font/lv_freetype.h"
 #include "font/lv_imgfont.h"
 #include "font/lv_symbol_def.h"

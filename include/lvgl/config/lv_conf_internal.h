@@ -2142,6 +2142,33 @@
     #endif
 #endif
 
+/** Enable vector font engine (mado fixed-point rasterizer, no FPU needed). */
+#ifndef LV_USE_FONT_VEC
+    #ifdef CONFIG_LV_USE_FONT_VEC
+        #define LV_USE_FONT_VEC CONFIG_LV_USE_FONT_VEC
+    #else
+        #define LV_USE_FONT_VEC 0
+    #endif
+#endif
+
+/** L2 bitmap cache budget in bytes per vec font instance (0 = disable cache). */
+#ifndef LV_FONT_VEC_CACHE_SIZE
+    #ifdef CONFIG_LV_FONT_VEC_CACHE_SIZE
+        #define LV_FONT_VEC_CACHE_SIZE CONFIG_LV_FONT_VEC_CACHE_SIZE
+    #else
+        #define LV_FONT_VEC_CACHE_SIZE 16384
+    #endif
+#endif
+
+/** L1 metrics cache sets per vec font instance (power of 2, 0 = disable). */
+#ifndef LV_FONT_VEC_CACHE_L1_SETS
+    #ifdef CONFIG_LV_FONT_VEC_CACHE_L1_SETS
+        #define LV_FONT_VEC_CACHE_L1_SETS CONFIG_LV_FONT_VEC_CACHE_L1_SETS
+    #else
+        #define LV_FONT_VEC_CACHE_L1_SETS 64
+    #endif
+#endif
+
 /** Enable drawing placeholders when glyph dsc is not found. */
 #ifndef LV_USE_FONT_PLACEHOLDER
     #ifdef LV_KCONFIG_PRESENT

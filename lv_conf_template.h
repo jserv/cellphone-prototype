@@ -739,6 +739,15 @@
 /** Enables/disables support for compressed fonts. */
 #define LV_USE_FONT_COMPRESSED 0
 
+/** Enable vector font engine (mado fixed-point rasterizer, no FPU needed). */
+#define LV_USE_FONT_VEC 0
+
+/** L2 bitmap cache budget in bytes per vec font instance (0 = disable cache). */
+#define LV_FONT_VEC_CACHE_SIZE 16384
+
+/** L1 metrics cache sets per vec font instance (power of 2, 0 = disable). */
+#define LV_FONT_VEC_CACHE_L1_SETS 64
+
 /** Enable drawing placeholders when glyph dsc is not found. */
 #define LV_USE_FONT_PLACEHOLDER 1
 
