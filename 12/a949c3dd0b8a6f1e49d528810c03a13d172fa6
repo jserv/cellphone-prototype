@@ -1,0 +1,34 @@
+demos/cellphone/main_test.c
+  s_88bf1387fa4875::t_01e915e5a2aebf 193-194,453-469,1016
+demos/cellphone/lv_demo_cellphone_photo.c
+  s_88bf1387fa4875::t_9a37f586a817bc 96
+  s_88bf1387fa4875::t_1bf05b413772c2 153
+  s_88bf1387fa4875::t_5cbb307e2b69ae 259-261,263
+  s_88bf1387fa4875::t_ad68f27056df60 278-283
+  s_88bf1387fa4875::t_459b650773e251 350
+  s_88bf1387fa4875::t_f3b3d863000b7b 4,9,20-55,61,70-71,74-81,83-85,92,99,116-122,124-126,130,133,145,147-149,154-164,166-169,171-180,183-190,206,214,236,245-246,262,264,268,288-289,292,302,304,308-309,314,317,332-336,339-349,357-367,381-399,401-409,418-419,421-430,432-451,453,457-474
+  s_88bf1387fa4875::t_71d2345fb80999 351-356
+  s_88bf1387fa4875::t_a87de1ac135719 207
+  s_88bf1387fa4875::t_5b98a9a04a0482 221-222,230-232
+  s_88bf1387fa4875::t_1a3e882567b28f 94
+  s_88bf1387fa4875::t_96401c9729919a 285
+  s_88bf1387fa4875::t_16c7288280fa48 410-417,420
+demos/cellphone/lv_demo_cellphone_photo.h
+  s_88bf1387fa4875::t_1fd91ad768ba9e 16-19,21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "12a949c3dd0b8a6f1e49d528810c03a13d172fa6",
+  "prompts": {},
+  "sessions": {
+    "s_88bf1387fa4875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "67f552fc-2c29-4b89-be4c-38764bcaa3ee",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Jim Huang <jserv@ccns.ncku.edu.tw>"
+    }
+  }
+}
