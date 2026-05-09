@@ -1,42 +1,36 @@
-demos/cellphone/lv_demo_cellphone_data.c
-  s_6a71d0703f5b57::t_1cf54bbe59697a 109-113
-  s_6a71d0703f5b57::t_dcbd17f3a093bc 14,29-36,39-58
-  s_6a71d0703f5b57::t_15aae2be93c5aa 37-38
-  s_6a71d0703f5b57::t_92e232fb2edc03 89-93,118-138
-demos/cellphone/lv_demo_cellphone_game.h
-  s_6a71d0703f5b57::t_1f30d7a6a595c7 1-30
-demos/cellphone/lv_demo_cellphone_contacts.c
-  s_6a71d0703f5b57::t_711f13b656c739 178
-  s_6a71d0703f5b57::t_3673b353ab0cf4 500-501
-  s_6a71d0703f5b57::t_4224940b951aa4 275-283
-  s_6a71d0703f5b57::t_b775f93b22ffbc 30
-  s_6a71d0703f5b57::t_2073fde56b7d92 298-304
-  s_6a71d0703f5b57::t_2d46882c0c1ae2 221-226
-  s_6a71d0703f5b57::t_82e61b9ddef1df 129-131,136,139
-  s_6a71d0703f5b57::t_b6152e500c9839 274,284-286
-  s_a4aa75f409acbc::t_dd9ff89ec7033c 71-72
-  s_6a71d0703f5b57::t_a252bb6e51dc58 68
-  s_6a71d0703f5b57::t_aa0862cfb692cc 346-362
-  s_6a71d0703f5b57::t_7412384b9a53d0 149-159
-  s_6a71d0703f5b57::t_7000920d961e5f 40-41
-  s_6a71d0703f5b57::t_fb305f333b0888 429-430
-  s_6a71d0703f5b57::t_78be1854b8b7b7 492-493
+demos/cellphone/lv_demo_cellphone_camera.c
+  s_a4aa75f409acbc::t_9d88f62b42464d 79-82
+  s_80dd85dbfa53bb::t_acaeb3804975ee 130,133
+  s_a4aa75f409acbc::t_0d2b3337739c29 127-129,131,134
+  s_a4aa75f409acbc::t_2707f974feaa6f 25
+  s_a4aa75f409acbc::t_5d4476c1ba3f7b 210-272
+  s_a4aa75f409acbc::t_d99cd9cf457d73 112
+demos/cellphone/lv_demo_cellphone_common.h
+  s_80dd85dbfa53bb::t_a69eeb11d487a1 335
+  s_80dd85dbfa53bb::t_22d31dd4acd73d 287
+  s_a4aa75f409acbc::t_a9bc4e0476b2c6 314-319
+demos/cellphone/lv_demo_cellphone_home.c
+  s_80dd85dbfa53bb::t_57611a8d59c2f3 190
+  s_80dd85dbfa53bb::t_db8ed92521faa9 195,197,212,215,221-222
+  s_a4aa75f409acbc::t_757adb696c85f6 126-128,130-131
+  s_80dd85dbfa53bb::t_14950ee87351e4 198-207,216-220,223-224,241,243-256,258-280,292-296,302-305,308-314,316-345,348,350,353-355,357-364,367-372,374-382,389-395,397-399,401-403
+  s_80dd85dbfa53bb::t_bda4a1a046a874 388
+demos/cellphone/lv_demo_cellphone_lock.c
+  s_a4aa75f409acbc::t_9bbdc0003fe7de 161,163-164,166-169
+  s_80dd85dbfa53bb::t_c1f8c1ff92cd92 70-85
+demos/cellphone/lv_demo_cellphone_settings.c
+  s_80dd85dbfa53bb::t_e6dff8c3069168 96-99,101,104-106,108-111,408-409
+  s_80dd85dbfa53bb::t_c1ae7b381b9bc2 358
+demos/cellphone/README.md
+  s_80dd85dbfa53bb::t_a5f1a26d0f7e5e 123-130
+  2e1970d774fdf197 271-288
 demos/cellphone/lv_demo_cellphone.c
-  s_6a71d0703f5b57::t_c5bdb4115b7eac 34
   s_a4aa75f409acbc::t_a1eed3e8140404 639-654
-demos/cellphone/lv_demo_cellphone_game.c
-  s_6a71d0703f5b57::t_d67942320efb9b 182-183
-  s_6a71d0703f5b57::t_896f4890ee77c2 179-181,184
-  s_6a71d0703f5b57::t_31d1059a61efe7 1-178,185-273,275-300,302-303,305-796
-demos/cellphone/main_test.c
-  bd908cef685771a8 64-73,97-128,137,207,272-273,284,286,300,310,318,322-324,326-328,335-336,338-340,342,344-345,357,359,365,367-368,372-373,377,379-380,382-386,416,418-419,430-432,434-486,502-552,614,638,640,642,644,647,659,667,680,686,719,721-728,734-735,743,748,761,775,809,823,830,837,842-843,855,887-1024,1026,1028-1043,1277-1418,1561-1562,1635,1658,1842-1863
-  s_6a71d0703f5b57::t_499f0ee1720ab4 29
-  2e1970d774fdf197 7-9,12,31,264,267,269-271,274-275,279-280,282-283,285,287,290-296,298-299,301-309,314-316,319-321,325,331-332,337,341,346-355,360-364,369,374-375,378,381,404-409,411-415,417,420-428,433,631-637,639,641,643,645-646,648-658,660-666,668-672,708-718,720,729-733,736-742,744-746,749-759,762-764,766,792-800,805-808,810-822,824-829,831-836,838-841,844-849,852,1025,1027,1471,1514-1515,1518-1519,1526-1539,1558-1560,1567,1615-1620,1636-1657,1702-1704,1706,1752-1762,1775,1780-1783
-  afd29ed2b2fef4bd 311,334,343,356,358,371,747,760,765,767
-  s_6a71d0703f5b57::t_a5048991583d3d 1221-1238
-demos/cellphone/lv_demo_cellphone_data.h
-  s_6a71d0703f5b57::t_69eb8b21391948 32-33
-  s_6a71d0703f5b57::t_7ca9e5a5464c23 34
+  s_80dd85dbfa53bb::t_6de30d0440ed8b 327
+  s_6a71d0703f5b57::t_c5bdb4115b7eac 34
+  s_80dd85dbfa53bb::t_d7c4baeab987fb 237-238,240
+  s_80dd85dbfa53bb::t_53de46328fe063 328-335,343,346-350
+  s_80dd85dbfa53bb::t_b8df165a19a910 620-622
 ---
 {
   "schema_version": "authorship/3.0.0",
@@ -52,31 +46,7 @@ demos/cellphone/lv_demo_cellphone_data.h
       "human_author": "Jim Huang",
       "total_additions": 812,
       "total_deletions": 556,
-      "accepted_lines": 288,
-      "overriden_lines": 0
-    },
-    "afd29ed2b2fef4bd": {
-      "agent_id": {
-        "tool": "codex",
-        "id": "019df1e5-5695-7503-b487-f3fd5e53aa70",
-        "model": "gpt-5.4"
-      },
-      "human_author": "Jim Huang",
-      "total_additions": 20,
-      "total_deletions": 4,
-      "accepted_lines": 10,
-      "overriden_lines": 0
-    },
-    "bd908cef685771a8": {
-      "agent_id": {
-        "tool": "claude",
-        "id": "2fcc2314-08ee-4036-9c12-2e5877de2ff1",
-        "model": "claude-opus-4-7"
-      },
-      "human_author": "Jim Huang",
-      "total_additions": 56802,
-      "total_deletions": 293,
-      "accepted_lines": 545,
+      "accepted_lines": 18,
       "overriden_lines": 0
     }
   }
