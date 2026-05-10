@@ -255,6 +255,11 @@ void cellphone_screen_home(void);
 void cellphone_screen_set_transitions_enabled(bool enabled);
 
 /**
+ * Return whether push/pop/home transition animations are enabled.
+ */
+bool cellphone_screen_transitions_enabled(void);
+
+/**
  * Get the current stack depth (0 = empty, 1 = home only).
  */
 int cellphone_screen_depth(void);

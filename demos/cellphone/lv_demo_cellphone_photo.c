@@ -71,7 +71,12 @@ static lv_obj_t * photo_viewer_create(lv_obj_t * parent);
 static void thumb_click_cb(lv_event_t * e);
 static void viewer_tap_cb(lv_event_t * e);
 static void viewer_tile_changed_cb(lv_event_t * e);
+static void viewer_visibility_cb(lv_event_t * e);
+static void viewer_load_timer_cb(lv_timer_t * timer);
+static void viewer_cancel_load_timer(void);
+static void viewer_enter_deferred_mode(void);
 static void viewer_sync_loaded_images(void);
+static void viewer_schedule_loaded_image_sync(void);
 static void viewer_set_active_title(uint32_t photo_idx);
 static void update_counter_label(uint32_t photo_idx);
 static void viewer_delete_cb(lv_event_t * e);
@@ -101,7 +106,9 @@ static lv_obj_t * s_viewer_active_title_label;
 static lv_obj_t * s_viewer_counter;
 static lv_obj_t * s_viewer_counter_label;
 static lv_obj_t * s_viewer_images[PHOTO_COUNT];
+static lv_timer_t * s_viewer_load_timer;
 static bool s_fullscreen;
+static bool s_viewer_highres_ready;
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -235,7 +242,11 @@ static void thumb_click_cb(lv_event_t * e)
 
 static lv_obj_t * photo_viewer_create(lv_obj_t * parent)
 {
+    lv_obj_t * screen = lv_obj_get_parent(parent);
+
+    viewer_cancel_load_timer();
     s_fullscreen = false;
+    s_viewer_highres_ready = false;
     s_synced_photo_idx = PHOTO_IDX_NONE;
     s_viewer_root = parent;
 
@@ -292,16 +303,25 @@ static lv_obj_t * photo_viewer_create(lv_obj_t * parent)
         /* Radius 0 on fullscreen tiles: a non-zero radius with clip_corner
          * makes lv_refr allocate two ARGB8888 corner-mask layers per draw
          * (~width * radius * 4 * 2 bytes), a ~19 KiB transient at 240x10. */
-        s_viewer_images[i] = create_photo_card(tile, &s_photo_assets[i], NULL,
+        uint32_t delta = i > s_selected_photo_idx ? i - s_selected_photo_idx : s_selected_photo_idx - i;
+        const char * initial_path = (delta <= 1) ? s_photo_assets[i].thumb_path : NULL;
+        s_viewer_images[i] = create_photo_card(tile, &s_photo_assets[i], initial_path,
                                                true, false, 0, 0,
                                                viewer_tap_cb, parent);
     }
 
     lv_obj_add_event_cb(tv, viewer_tile_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
     viewer_sync_loaded_images();
+    viewer_schedule_loaded_image_sync();
     lv_tileview_set_tile_by_index(tv, s_selected_photo_idx, 0, LV_ANIM_OFF);
 
     lv_obj_add_event_cb(parent, viewer_delete_cb, LV_EVENT_DELETE, NULL);
+    if(screen) {
+        lv_obj_add_event_cb(screen, viewer_visibility_cb,
+                            (lv_event_code_t)cellphone_screen_event_hidden(), NULL);
+        lv_obj_add_event_cb(screen, viewer_visibility_cb,
+                            (lv_event_code_t)cellphone_screen_event_shown(), NULL);
+    }
 
     return parent;
 }
@@ -318,6 +338,8 @@ static void viewer_delete_cb(lv_event_t * e)
     s_viewer_active_title_label = NULL;
     s_viewer_counter = NULL;
     s_viewer_counter_label = NULL;
+    viewer_cancel_load_timer();
+    s_viewer_highres_ready = false;
     s_synced_photo_idx = PHOTO_IDX_NONE;
     lv_memzero(s_viewer_images, sizeof(s_viewer_images));
 }
@@ -366,9 +388,59 @@ static void viewer_tile_changed_cb(lv_event_t * e)
     if(new_idx == s_selected_photo_idx) return;
 
     s_selected_photo_idx = new_idx;
-    viewer_sync_loaded_images();
+    viewer_enter_deferred_mode();
     update_counter_label(s_selected_photo_idx);
     viewer_set_active_title(s_selected_photo_idx);
+}
+
+static void viewer_visibility_cb(lv_event_t * e)
+{
+    /* Hidden: cancel the pending hires load -- decoding into off-screen
+     * tiles is wasted work. Shown: re-arm the deferred load if the
+     * initial defer window was interrupted, so the user isn't stuck on
+     * thumbnails after a push/pop on top of the viewer. */
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == (lv_event_code_t)cellphone_screen_event_hidden()) {
+        viewer_cancel_load_timer();
+        return;
+    }
+    if(code == (lv_event_code_t)cellphone_screen_event_shown()) {
+        if(!s_viewer_highres_ready) viewer_schedule_loaded_image_sync();
+    }
+}
+
+static void viewer_load_timer_cb(lv_timer_t * timer)
+{
+    LV_UNUSED(timer);
+    s_viewer_load_timer = NULL;
+    s_viewer_highres_ready = true;
+    s_synced_photo_idx = PHOTO_IDX_NONE;
+    viewer_sync_loaded_images();
+}
+
+static void viewer_cancel_load_timer(void)
+{
+    if(s_viewer_load_timer) {
+        lv_timer_delete(s_viewer_load_timer);
+        s_viewer_load_timer = NULL;
+    }
+}
+
+static void viewer_enter_deferred_mode(void)
+{
+    /* After the initial defer window has elapsed, a swipe must NOT drop
+     * the visible tile from view_path back to thumb_path -- that thumb
+     * pop is the visual regression we promised to avoid. Only the first
+     * open (highres_ready==false) needs the timer-deferred load. */
+    if(s_viewer_highres_ready) {
+        s_synced_photo_idx = PHOTO_IDX_NONE;
+        viewer_sync_loaded_images();
+        return;
+    }
+    viewer_cancel_load_timer();
+    s_synced_photo_idx = PHOTO_IDX_NONE;
+    viewer_sync_loaded_images();
+    viewer_schedule_loaded_image_sync();
 }
 
 static void viewer_sync_loaded_images(void)
@@ -381,7 +453,9 @@ static void viewer_sync_loaded_images(void)
         if(s_viewer_images[i] == NULL) continue;
 
         uint32_t delta = i > s_selected_photo_idx ? i - s_selected_photo_idx : s_selected_photo_idx - i;
-        const char * want = (delta <= 1) ? s_photo_assets[i].view_path : NULL;
+        const char * want;
+        if(s_viewer_highres_ready) want = (delta <= 1) ? s_photo_assets[i].view_path : NULL;
+        else want = (delta <= 1) ? s_photo_assets[i].thumb_path : NULL;
         /* lv_image_set_src strdups file paths, so pointer-equality against
          * lv_image_get_src never matches; compare by content instead. */
         const char * cur = (const char *)lv_image_get_src(s_viewer_images[i]);
@@ -391,6 +465,30 @@ static void viewer_sync_loaded_images(void)
     }
 
     s_synced_photo_idx = s_selected_photo_idx;
+}
+
+static void viewer_schedule_loaded_image_sync(void)
+{
+    if(!cellphone_photo_uses_real_jpeg()) return;
+    if(s_viewer_highres_ready) return;
+    if(s_viewer_load_timer) return;
+    if(!cellphone_screen_transitions_enabled()) {
+        s_viewer_highres_ready = true;
+        s_synced_photo_idx = PHOTO_IDX_NONE;
+        viewer_sync_loaded_images();
+        return;
+    }
+
+    s_viewer_load_timer = lv_timer_create(viewer_load_timer_cb,
+                                          CELLPHONE_MOTION_STANDARD.enter_ms + 20, NULL);
+    if(s_viewer_load_timer) {
+        lv_timer_set_repeat_count(s_viewer_load_timer, 1);
+        return;
+    }
+
+    s_viewer_highres_ready = true;
+    s_synced_photo_idx = PHOTO_IDX_NONE;
+    viewer_sync_loaded_images();
 }
 
 static void viewer_set_active_title(uint32_t photo_idx)

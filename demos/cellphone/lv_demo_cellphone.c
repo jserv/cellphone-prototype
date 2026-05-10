@@ -841,6 +841,11 @@ void cellphone_screen_set_transitions_enabled(bool enabled)
     s_screen_transitions_enabled = enabled;
 }
 
+bool cellphone_screen_transitions_enabled(void)
+{
+    return s_screen_transitions_enabled;
+}
+
 int cellphone_screen_depth(void)
 {
     return s_stack_top + 1;

@@ -467,6 +467,24 @@ static uint32_t count_loaded_images(lv_obj_t * root)
     return n;
 }
 
+static uint32_t count_loaded_view_images(lv_obj_t * root)
+{
+    if(!root) return 0;
+
+    uint32_t n = 0;
+    if(lv_obj_check_type(root, &lv_image_class)) {
+        const char * src = (const char *)lv_image_get_src(root);
+        if(src != NULL && strstr(src, "/view/") != NULL) n = 1;
+    }
+
+    uint32_t cc = lv_obj_get_child_count(root);
+    for(uint32_t i = 0; i < cc; i++) {
+        n += count_loaded_view_images(lv_obj_get_child(root, i));
+    }
+
+    return n;
+}
+
 static lv_obj_t * find_first_scrollable_descendant(lv_obj_t * root)
 {
     if(!root) return NULL;
@@ -1016,13 +1034,27 @@ static void test_photos_gestures(void)
 
     action_sample_t open_sample = action_sample_now();
     int depth_after_thumb = cellphone_screen_depth();
+    bool transitions_enabled = cellphone_screen_transitions_enabled();
+    if(uses_real_jpeg) cellphone_screen_set_transitions_enabled(true);
     check("tap thumbnail 'Portrait'", sim_tap_label("Portrait"));
-    sim_wait(500);
+    sim_wait(80);
     action_report("photo open", open_sample);
     check("photo viewer pushed",
           cellphone_screen_depth() == depth_after_thumb + 1);
 
     lv_obj_t * viewer = cellphone_screen_top();
+    if(uses_real_jpeg) {
+        lv_obj_send_event(viewer, (lv_event_code_t)cellphone_screen_event_hidden(), NULL);
+        sim_wait(500);
+        check("covering viewer cancels deferred hires while hidden",
+              count_loaded_view_images(viewer) == 0);
+        lv_obj_send_event(viewer, (lv_event_code_t)cellphone_screen_event_shown(), NULL);
+        sim_wait(500);
+        check("returning to viewer resumes deferred hires load",
+              count_loaded_view_images(viewer) > 0);
+        cellphone_screen_set_transitions_enabled(transitions_enabled);
+    }
+
     lv_obj_t * title_lbl = find_label_obj(viewer, "Photos");
     check("viewer title 'Photos' label present", title_lbl != NULL);
     check("viewer shows first photo title", screen_has_label_text(viewer, "Portrait"));
