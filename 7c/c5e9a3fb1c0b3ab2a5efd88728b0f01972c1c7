@@ -1,0 +1,24 @@
+demos/cellphone/lv_demo_cellphone_photo.c
+  s_3c289ab36c4368::t_d60c991e5a7793 479-480
+  s_3c289ab36c4368::t_9c2cfd65e505d7 323
+  s_3c289ab36c4368::t_b021264b5ddbb7 306-307
+  s_3c289ab36c4368::t_b2cd1e051af044 431-439
+  s_3c289ab36c4368::t_31802a3117d5b6 398-409
+  s_3c289ab36c4368::t_7aa4746240e054 458
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "7cc5e9a3fb1c0b3ab2a5efd88728b0f01972c1c7",
+  "prompts": {},
+  "sessions": {
+    "s_3c289ab36c4368": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "57cdf0e8-c298-441e-9827-b3cffab1e464",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}
